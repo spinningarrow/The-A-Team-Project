@@ -13,6 +13,7 @@ hs_err_pid*
 # Idea
 workspace.xml
 tasks.xml
+profile_settings.xml
 
 # NetBeans
 nbproject/private/
