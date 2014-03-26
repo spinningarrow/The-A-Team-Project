@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="MASON_141">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/lib/MASON_14.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

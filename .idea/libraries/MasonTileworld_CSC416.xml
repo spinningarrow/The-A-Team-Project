@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="MasonTileworld_CSC416">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dist/MasonTileworld_CSC416.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
