@@ -42,6 +42,7 @@ import tileworld.environment.TWDirection;
 public class DefaultTWPlanner implements TWPlanner {
 
     public TWPath generatePlan() {
+        
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

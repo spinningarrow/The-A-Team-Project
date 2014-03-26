@@ -5,10 +5,11 @@
 
 package tileworld.agent;
 
-import tileworld.environment.TWDirection;
-import tileworld.environment.TWEnvironment;
+import sim.field.grid.ObjectGrid2D;
+import tileworld.environment.*;
 import tileworld.exceptions.CellBlockedException;
-
+import tileworld.planners.AstarPathGenerator;
+import tileworld.planners.TWPath;
 /**
  * TWContextBuilder
  *
@@ -29,8 +30,14 @@ public class SimpleTWAgent extends TWAgent{
 
     protected TWThought think() {
 //        getMemory().getClosestObjectInSensorRange(Tile.class);
-          System.out.println("Simple Score: " + this.score);
-        return new TWThought(TWAction.MOVE,getRandomDirection());
+        //DefaultTWPlanner plan = new DefaultTWPlanner();
+        //plan.generatePlan();
+        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(),this,30);
+        TWPath path = astar.findPath(x, y, 15, 15);
+        System.out.println("Simple Score: " + this.score);
+        if(path != null)
+            return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
+        else return new TWThought(TWAction.MOVE,getRandomDirection());
     }
 
     @Override
@@ -44,6 +51,19 @@ public class SimpleTWAgent extends TWAgent{
 
         try {
             this.move(thought.getDirection());
+            ObjectGrid2D objectGrid2D = this.getEnvironment().getObjectGrid();
+            TWEntity e = (TWEntity) objectGrid2D.get(x, y);
+            if(e != null && (e instanceof TWTile))
+            {
+               pickUpTile((TWTile)e);
+               System.out.println("Tiles: "+this.carriedTiles.size());
+            }
+            if(e != null && (e instanceof TWHole) && this.carriedTiles.size() > 0)
+            {
+                putTileInHole((TWHole)e);
+                System.out.println("Remaining Tiles: "+this.carriedTiles.size());
+            }
+
         }  catch (CellBlockedException ex) {
 
            // Cell is blocked, replan?

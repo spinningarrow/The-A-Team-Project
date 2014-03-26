@@ -244,8 +244,8 @@ public class TWAgentWorkingMemory {
      * Also note that it is likely that nearby objects are also the most recently observed
      *
      *
-     * @param x coordinate from which to check for tiles
-     * @param y coordinate from which to check for tiles
+     * @param sx coordinate from which to check for tiles
+     * @param sy coordinate from which to check for tiles
      * @param threshold how recently we want to have see the object
      * @param type the class of object we're looking for (Must inherit from TWObject, specifically tile or hole)
      * @return
