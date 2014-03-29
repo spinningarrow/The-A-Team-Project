@@ -80,21 +80,30 @@ public class SimpleTWAgent extends TWAgent{
         if (entityList.size() > 0) {
 
             // Find astar path to closest hole if we have carried tiles
+            // if there is no other tile closer than the nearest hole
             if (this.hasTile()) {
-                double minDistance = Double.MAX_VALUE;
+                double minHoleDistance = Double.MAX_VALUE;
+                double minTileDistance = Double.MAX_VALUE;
                 TWHole nearestHole = null;
 
                 for (TWEntity entity : entityList) {
                     if (entity instanceof TWHole) {
                         double distance = entity.getDistanceTo(this);
-                        if (distance < minDistance) {
-                            minDistance = distance;
+                        if (distance < minHoleDistance) {
+                            minHoleDistance = distance;
                             nearestHole = (TWHole) entity;
+                        }
+                    }
+
+                    else if (entity instanceof TWTile) {
+                        double distance = entity.getDistanceTo(this);
+                        if (distance < minTileDistance) {
+                            minTileDistance = distance;
                         }
                     }
                 }
 
-                if (nearestHole != null) {
+                if ((this.carriedTiles.size() == 3 && nearestHole != null) || minHoleDistance < minTileDistance) {
                     AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
 
                     TWPath path = astar.findPath(x, y, nearestHole.getX(), nearestHole.getY());
