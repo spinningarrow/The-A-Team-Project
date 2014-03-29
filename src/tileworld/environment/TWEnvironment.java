@@ -12,6 +12,8 @@ import sim.util.Bag;
 import sim.util.Int2D;
 import tileworld.Parameters;
 import tileworld.TWGUI;
+import tileworld.agent.PQITwo;
+import tileworld.agent.PQIOne;
 import tileworld.agent.SimpleTWAgent;
 import tileworld.agent.TWAgent;
 
@@ -53,6 +55,8 @@ public class TWEnvironment extends SimState implements Steppable {
     private Bag tiles;
     private Bag holes;
     private Bag obstacles;
+    SimpleTWAgent a;
+    PQITwo b;
     private TWFuelStation fuelingStation;
 
 
@@ -94,11 +98,15 @@ public class TWEnvironment extends SimState implements Steppable {
         //The environment is also stepped each step
 
         schedule.scheduleRepeating(this, 1, 1.0);
-        
+        a = new SimpleTWAgent(10, 1, this, Parameters.defaultFuelLevel);
+        createAgent(a,2);
         //Now we create some agents
-        createAgent(new SimpleTWAgent(10, 1, this, Parameters.defaultFuelLevel),2);
+        /*a = new PQIOne(10, 1, this, Parameters.defaultFuelLevel);
+        createAgent(a,2);
+        b = new PQITwo(10, 1, this, Parameters.defaultFuelLevel);
+        createAgent(b,3);
 //      createAgent(new VaisaghAgent(10, 1, this, Parameters.defaultFuelLevel),3);
-
+*/
         
 //        
         //create the fueling station
@@ -237,8 +245,7 @@ public class TWEnvironment extends SimState implements Steppable {
     /**
      * picks a random location from the environment, used for free walk algorithm.
      * Bit stupid now, will be very slow when the environment fills up.
-     * @param gx - this will be resulting x coordinate
-     * @param gy
+     * @param 
      */
     public Int2D generateRandomLocation() {
         int gx = 1, gy = 1;

@@ -124,7 +124,7 @@ public class AstarPathGenerator implements TWPathGenerator {
                         continue;
                     }
 
-                    // if we're not allowing diaganol movement then only
+                    // if we're not allowing diagonal movement then only
                     // one of x or y can be set
                     if (!allowDiagMovement) {
                         if ((x != 0) && (y != 0)) {

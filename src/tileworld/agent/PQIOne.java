@@ -10,6 +10,7 @@ import tileworld.environment.*;
 import tileworld.exceptions.CellBlockedException;
 import tileworld.planners.AstarPathGenerator;
 import tileworld.planners.TWPath;
+
 /**
  * TWContextBuilder
  *
@@ -22,10 +23,14 @@ import tileworld.planners.TWPath;
  * Description:
  *
  */
-public class SimpleTWAgent extends TWAgent{
+public class PQIOne extends TWAgent{
+    int destx;
+    int desty;
 
-    public SimpleTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
+    public PQIOne(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
+        destx = 5;
+        desty = 5;
     }
 
     protected TWThought think() {
@@ -34,10 +39,10 @@ public class SimpleTWAgent extends TWAgent{
         //plan.generatePlan();
         AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(),this,30);
         System.out.println(this.fuelLevel);
-        if (this.fuelLevel>400)
+        if (this.fuelLevel>300)
         {
-            TWPath path = astar.findPath(x, y, 15, 15);
-            System.out.println("Simple Score: " + this.score);
+            TWPath path = astar.findPath(this.x, this.y, destx, desty);
+            System.out.println("ONE Score: " + this.score);
             if(path != null)
                 return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
             else return new TWThought(TWAction.MOVE,getRandomDirection());
@@ -47,9 +52,12 @@ public class SimpleTWAgent extends TWAgent{
             if((this.x == this.y) && (this.x == 0))
             {
                 super.refuel();
+                destx = +10;
+                desty = +10;
+
             }
             TWPath path = astar.findPath(this.x, this.y, 0, 0);
-            System.out.println("Trackingback->Simple Score: " + this.score);
+            System.out.println("ONE Tracking back->Simple Score: " + this.score);
             if(path != null)
                 return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
             else return new TWThought(TWAction.MOVE,getRandomDirection());

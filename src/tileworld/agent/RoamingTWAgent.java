@@ -10,6 +10,7 @@ import tileworld.environment.*;
 import tileworld.exceptions.CellBlockedException;
 import tileworld.planners.AstarPathGenerator;
 import tileworld.planners.TWPath;
+
 /**
  * TWContextBuilder
  *
@@ -22,9 +23,9 @@ import tileworld.planners.TWPath;
  * Description:
  *
  */
-public class SimpleTWAgent extends TWAgent{
+public class RoamingTWAgent extends TWAgent{
 
-    public SimpleTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
+    public RoamingTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
     }
 
@@ -44,16 +45,15 @@ public class SimpleTWAgent extends TWAgent{
         }
         else
         {
-            if((this.x == this.y) && (this.x == 0))
+            if((this.x == this.y) && (this.x == 0) && this.fuelLevel<150)
             {
                 super.refuel();
             }
-            TWPath path = astar.findPath(this.x, this.y, 0, 0);
-            System.out.println("Trackingback->Simple Score: " + this.score);
+            TWPath path = astar.findPath(x, y, 0, 0);
+            System.out.println("Tracking back->Simple Score: " + this.score);
             if(path != null)
                 return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
             else return new TWThought(TWAction.MOVE,getRandomDirection());
-
         }
     }
 
@@ -108,6 +108,6 @@ public class SimpleTWAgent extends TWAgent{
 
     @Override
     public String getName() {
-        return "Dumb Agent";
+        return "Roaming Agent";
     }
 }
