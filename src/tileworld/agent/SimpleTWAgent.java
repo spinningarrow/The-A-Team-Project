@@ -44,8 +44,8 @@ public class SimpleTWAgent extends TWAgent{
         int bottomRightX = (this.getX() + sensorRange) > Parameters.xDimension ? Parameters.xDimension : this.getX() + sensorRange;
         int bottomRightY = (this.getY() + sensorRange) > Parameters.yDimension ? Parameters.yDimension : this.getY() + sensorRange;
 
-        for (int i = topLeftX; i <= bottomRightX; i++) {
-            for (int j = topLeftY; j <= bottomRightY; j++) {
+        for (int i = topLeftX; i < bottomRightX; i++) {
+            for (int j = topLeftY; j < bottomRightY; j++) {
                 TWEntity e = (TWEntity) objectGrid.get(i, j);
 
                 if (e == null) {
@@ -61,37 +61,21 @@ public class SimpleTWAgent extends TWAgent{
         return entityList;
     }
 
-    /*protected TWThought think() {
-//        getMemory().getClosestObjectInSensorRange(Tile.class);
-        //DefaultTWPlanner plan = new DefaultTWPlanner();
-        //plan.generatePlan();
-        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(),this,30);
-        System.out.println(this.fuelLevel);
-        if (this.fuelLevel>400)
-        {
-            TWPath path = astar.findPath(x, y, 15, 15);
-            System.out.println("Simple Score: " + this.score);
-            if(path != null)
-                return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
-            else return new TWThought(TWAction.MOVE,getRandomDirection());
-        }
-        else
-        {
-            if((this.x == this.y) && (this.x == 0))
-            {
-                super.refuel();
-            }
-            TWPath path = astar.findPath(this.x, this.y, 0, 0);
-            System.out.println("Trackingback->Simple Score: " + this.score);
-            if(path != null)
-                return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
-            else return new TWThought(TWAction.MOVE,getRandomDirection());
-
-        }
-    }*/
-
     protected TWThought think() {
         List<TWEntity> entityList = this.getEntitiesInRange();
+
+        if (this.fuelLevel < 400) {
+            // Refuel!
+            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+
+            TWPath path = astar.findPath(this.x, this.y, 0, 0);
+
+            System.out.println("Trackingback->Simple Score: " + this.score);
+
+            if (path != null) {
+                return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
+            }
+        }
 
         if (entityList.size() > 0) {
 
@@ -161,6 +145,10 @@ public class SimpleTWAgent extends TWAgent{
         //pickUpTile(Tile)
         //putTileInHole(Hole)
         //refuel()
+
+        if (this.x == this.y && this.x == 0) {
+            super.refuel();
+        }
 
         try {
             this.move(thought.getDirection());
