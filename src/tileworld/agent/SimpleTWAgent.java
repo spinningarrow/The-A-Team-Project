@@ -169,7 +169,18 @@ public class SimpleTWAgent extends TWAgent{
 
         }
 
-
+        /* Idea here is that if we are carrying no tiles and no tiles are sensed in our vision field
+         * then we retrieve the last tile from our memory and generate a path towards it. Eventually, if we
+         * come across a closer tile then the agent will automatically move to it (execute one of the blocks above)
+         * or it will come to this point and continue to move to the same tile we identified. */
+        TWTile tile = this.getMemory().getNearbyTile(this.x, this.y, 15);
+        TWHole hole = this.getMemory().getNearbyHole(this.x,this.y,15);
+        if(tile != null && hole != null)
+        {
+            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+            TWPath path = astar.findPath(x, y, hole.getX(), hole.getY());
+            return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
+        }
         // Otherwise move randomly till you see something interesting
         return new TWThought(TWAction.MOVE, getRandomDirection());
     }
