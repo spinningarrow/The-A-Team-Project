@@ -64,14 +64,28 @@ public class SimpleTWAgent extends TWAgent{
     protected TWThought think() {
         List<TWEntity> entityList = this.getEntitiesInRange();
 
+        //refuel
+        if (this.fuelLevel<998 && this.x == this.y && this.x == 0) {
+
+            return new TWThought(TWAction.REFUEL,null);
+        }
+
+
+        //pick up a TILE
+        if(this.carriedTiles.size()<3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
+            return new TWThought(TWAction.PICKUP,null);
+        }
+
+        //put down a TILE
+        if(this.carriedTiles.size()>0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
+            return new TWThought(TWAction.PUTDOWN,null);
+        }
+
         if (this.fuelLevel < 400) {
-            // Refuel!
+
             AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
-
             TWPath path = astar.findPath(this.x, this.y, 0, 0);
-
-            System.out.println("Trackingback->Simple Score: " + this.score);
-
+            System.out.println("Tracking back->Simple Score: " + this.score);
             if (path != null) {
                 return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
             }
@@ -155,28 +169,31 @@ public class SimpleTWAgent extends TWAgent{
         //putTileInHole(Hole)
         //refuel()
 
-        if (this.x == this.y && this.x == 0) {
-            super.refuel();
-        }
 
         try {
-            this.move(thought.getDirection());
             ObjectGrid2D objectGrid2D = this.getEnvironment().getObjectGrid();
             TWEntity e = (TWEntity) objectGrid2D.get(x, y);
-            if(e != null && (e instanceof TWTile))
+            switch (thought.getAction())
             {
-               pickUpTile((TWTile)e);
-               System.out.println("Tiles: "+this.carriedTiles.size());
+                case MOVE:
+                    move(thought.getDirection());
+                    break;
+                case PICKUP:
+                    pickUpTile((TWTile)e);
+                    System.out.println("Tiles: "+this.carriedTiles.size());
+                    break;
+                case PUTDOWN:
+                    putTileInHole((TWHole)e);
+                    System.out.println("Remaining Tiles: "+this.carriedTiles.size());
+                    break;
+                case REFUEL:
+                    super.refuel();
+                    break;
             }
-            if(e != null && (e instanceof TWHole) && this.carriedTiles.size() > 0)
-            {
-                putTileInHole((TWHole)e);
-                System.out.println("Remaining Tiles: "+this.carriedTiles.size());
-            }
+
 
         }  catch (CellBlockedException ex) {
 
-           // Cell is blocked, replan?
         }
     }
 
