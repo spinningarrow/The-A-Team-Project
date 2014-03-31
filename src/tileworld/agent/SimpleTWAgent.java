@@ -81,12 +81,25 @@ public class SimpleTWAgent extends TWAgent{
             return new TWThought(TWAction.PUTDOWN,null);
         }
 
-        if (this.fuelLevel < 400) {
+        int threshold = 30;
+        if (this.fuelLevel < x+y+threshold) {
 
             AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
             TWPath path = astar.findPath(this.x, this.y, 0, 0);
             System.out.println("Tracking back->Simple Score: " + this.score);
             if (path != null) {
+                if(this.carriedTiles.size()<3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
+                    System.out.println("Tracking back pickup");
+                    System.exit(8);
+                    return new TWThought(TWAction.PICKUP,null);
+                }
+
+                //put down a TILE
+                if(this.carriedTiles.size()>0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
+                    System.out.println("Tracking back putdown");
+                    System.exit(2);
+                    return new TWThought(TWAction.PUTDOWN,null);
+                }
                 return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
             }
         }
@@ -155,6 +168,7 @@ public class SimpleTWAgent extends TWAgent{
             }
 
         }
+
 
         // Otherwise move randomly till you see something interesting
         return new TWThought(TWAction.MOVE, getRandomDirection());

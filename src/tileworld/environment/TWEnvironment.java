@@ -100,8 +100,8 @@ public class TWEnvironment extends SimState implements Steppable {
         schedule.scheduleRepeating(this, 1, 1.0);
         a = new SimpleTWAgent(10, 1, this, Parameters.defaultFuelLevel);
         createAgent(a,2);
-        b = new SimpleTWAgent(10, 1, this, Parameters.defaultFuelLevel);
-        createAgent(b,3);
+//        b = new SimpleTWAgent(10, 1, this, Parameters.defaultFuelLevel);
+//        createAgent(b,3);
         //Now we create some agents
         /*a = new PQIOne(10, 1, this, Parameters.defaultFuelLevel);
         createAgent(a,2);
