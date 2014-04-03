@@ -28,6 +28,7 @@ import java.util.List;
  *
  */
 public class SimpleTWAgent extends TWAgent{
+    private boolean trackbackFlag = false;
 
     public SimpleTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
@@ -61,6 +62,22 @@ public class SimpleTWAgent extends TWAgent{
         return entityList;
     }
 
+    int getTrackbackThreshold ()
+    {
+        ObjectGrid2D subspace = this.getMemory().getMemoryGrid();
+        int obstacleCount = 0;
+        for(int i=0; i<=x;i++)
+        {
+            for(int j=0; j<=y;j++)
+            {
+                if(subspace.get(i,j) instanceof TWObstacle)
+                    obstacleCount++;
+            }
+        }
+        return (int) Math.abs(Math.pow(obstacleCount,3)+x+y);
+
+    }
+
     protected TWThought think() {
         List<TWEntity> entityList = this.getEntitiesInRange();
 
@@ -81,9 +98,10 @@ public class SimpleTWAgent extends TWAgent{
             return new TWThought(TWAction.PUTDOWN,null);
         }
 
-        int threshold = 30;
-        if (this.fuelLevel < x+y+threshold) {
-
+        int threshold = getTrackbackThreshold();
+        System.out.println("THIS IS THE THRESHOLD MOFOs "+threshold);
+        if (this.fuelLevel <= threshold || trackbackFlag) {
+            trackbackFlag = true;
             AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
             TWPath path = astar.findPath(this.x, this.y, 0, 0);
             System.out.println("Tracking back->Simple Score: " + this.score);
@@ -179,7 +197,10 @@ public class SimpleTWAgent extends TWAgent{
         {
             AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
             TWPath path = astar.findPath(x, y, hole.getX(), hole.getY());
-            return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
+            if (path!=null)
+            {
+                return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
+            }
         }
         // Otherwise move randomly till you see something interesting
         return new TWThought(TWAction.MOVE, getRandomDirection());
@@ -212,6 +233,7 @@ public class SimpleTWAgent extends TWAgent{
                     System.out.println("Remaining Tiles: "+this.carriedTiles.size());
                     break;
                 case REFUEL:
+                    trackbackFlag=false;
                     super.refuel();
                     break;
             }
