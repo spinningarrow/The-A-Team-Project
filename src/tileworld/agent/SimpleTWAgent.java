@@ -64,17 +64,10 @@ public class SimpleTWAgent extends TWAgent{
 
     int getTrackbackThreshold ()
     {
-        ObjectGrid2D subspace = this.getMemory().getMemoryGrid();
-        int obstacleCount = 0;
-        for(int i=0; i<=x;i++)
-        {
-            for(int j=0; j<=y;j++)
-            {
-                if(subspace.get(i,j) instanceof TWObstacle)
-                    obstacleCount++;
-            }
-        }
-        return (int) Math.abs(Math.pow(obstacleCount,3)+x+y);
+
+        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+        TWPath path = astar.findPath(this.x, this.y, 0, 0);
+        return path!=null && (path.getpath().size()<=fuelLevel) ? path.getpath().size()+1 : -1;
 
     }
 
@@ -99,6 +92,11 @@ public class SimpleTWAgent extends TWAgent{
         }
 
         int threshold = getTrackbackThreshold();
+        if(threshold == -1 && x!=0 && y!=0)
+        {
+            return null;
+        }
+
         System.out.println("THIS IS THE THRESHOLD MOFOs "+threshold);
         if (this.fuelLevel <= threshold || trackbackFlag) {
             trackbackFlag = true;
@@ -219,23 +217,33 @@ public class SimpleTWAgent extends TWAgent{
         try {
             ObjectGrid2D objectGrid2D = this.getEnvironment().getObjectGrid();
             TWEntity e = (TWEntity) objectGrid2D.get(x, y);
-            switch (thought.getAction())
+            if(thought != null)
             {
-                case MOVE:
-                    move(thought.getDirection());
-                    break;
-                case PICKUP:
-                    pickUpTile((TWTile)e);
-                    System.out.println("Tiles: "+this.carriedTiles.size());
-                    break;
-                case PUTDOWN:
-                    putTileInHole((TWHole)e);
-                    System.out.println("Remaining Tiles: "+this.carriedTiles.size());
-                    break;
-                case REFUEL:
-                    trackbackFlag=false;
-                    super.refuel();
-                    break;
+                switch (thought.getAction())
+                {
+                    case MOVE:
+                        move(thought.getDirection());
+                        break;
+                    case PICKUP:
+                        pickUpTile((TWTile)e);
+                        System.out.println("Tiles: "+this.carriedTiles.size());
+                        break;
+                    case PUTDOWN:
+                        putTileInHole((TWHole)e);
+                        System.out.println("Remaining Tiles: "+this.carriedTiles.size());
+                        break;
+                    case REFUEL:
+                        trackbackFlag=false;
+                        super.refuel();
+                        break;
+                    default:
+                        System.out.println("jus 'angin 'round them obstacles nigga!");
+
+                }
+            }
+            else
+            {
+                System.out.println("jus 'angin 'round them obstacles nigga!");
             }
 
 

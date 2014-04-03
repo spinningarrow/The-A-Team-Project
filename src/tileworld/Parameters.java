@@ -37,4 +37,18 @@ public class Parameters {
     public static final double obstacleDev = 0.5f;
     public static final int lifeTime = 30;
 
+//    //Environment Parameters
+//    public static final int xDimension = 100; //size in cells
+//    public static final int yDimension = 100;
+//
+//    //Object Parameters
+//    public static final double tileMean = 0.2;
+//    public static final double holeMean = 0.2;
+//    public static final double obstacleMean = 0.2;
+//    public static final double tileDev = 0.05f;
+//    public static final double holeDev = 0.05f;
+//    public static final double obstacleDev = 0.05f;
+//    public static final int lifeTime = 100;
+
+
 }
