@@ -10,6 +10,7 @@ import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.portrayal.grid.ObjectGridPortrayal2D;
+import tileworld.agent.SmarterTWAgent;
 import tileworld.agent.TWAgent;
 import tileworld.environment.TWEnvironment;
 import tileworld.environment.TWFuelStation;
@@ -103,7 +104,7 @@ public class TWGUI extends GUIState {
         agentGridPortrayal.setPortrayalForClass(TWAgent.class, TWAgent.getPortrayal());
 
 
-       // gridPortrayal.setPortrayalForClass(SimpleTWAgent.class, TWAgent.getPortrayal());
+        agentGridPortrayal.setPortrayalForClass(SmarterTWAgent.class, SmarterTWAgent.getPortrayal());
         agentGridPortrayal.setPortrayalForRemainder(TWAgent.getPortrayal());
 
         objectGridPortrayal.setPortrayalForClass(TWHole.class, TWHole.getPortrayal());

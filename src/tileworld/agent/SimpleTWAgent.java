@@ -64,11 +64,9 @@ public class SimpleTWAgent extends TWAgent{
 
     int getTrackbackThreshold ()
     {
-
         AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
         TWPath path = astar.findPath(this.x, this.y, 0, 0);
         return path!=null && (path.getpath().size()<=fuelLevel) ? path.getpath().size()+1 : -1;
-
     }
 
     protected TWThought think() {
@@ -94,7 +92,7 @@ public class SimpleTWAgent extends TWAgent{
         int threshold = getTrackbackThreshold();
         if(threshold == -1 && x!=0 && y!=0)
         {
-            return null;
+            return new TWThought(TWAction.WAIT,null);
         }
 
         System.out.println("THIS IS THE THRESHOLD MOFOs "+threshold);
@@ -200,9 +198,41 @@ public class SimpleTWAgent extends TWAgent{
                 return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
             }
         }
+
         // Otherwise move randomly till you see something interesting
-        return new TWThought(TWAction.MOVE, getRandomDirection());
+       return new TWThought(TWAction.MOVE, getBoundedDirection());
     }
+
+    TWDirection getBoundedDirection() {
+        TWDirection randomDirection;
+        int newX =x , newY = y;
+        if(newX >= newY)
+            return TWDirection.W;
+        else do
+        {
+            randomDirection = getRandomDirection();
+            switch(randomDirection)
+            {
+                case N:
+                    newY -=1;
+                    break;
+                case E:
+                    newX  +=1;
+                    break;
+                case W:
+                    newX -=1;
+                    break;
+                case S:
+                    newY +=1;
+                    break;
+            }
+
+
+        }while (newX >  newY);
+        return randomDirection;
+
+    }
+
 
     @Override
     protected void act(TWThought thought) {
@@ -217,8 +247,7 @@ public class SimpleTWAgent extends TWAgent{
         try {
             ObjectGrid2D objectGrid2D = this.getEnvironment().getObjectGrid();
             TWEntity e = (TWEntity) objectGrid2D.get(x, y);
-            if(thought != null)
-            {
+
                 switch (thought.getAction())
                 {
                     case MOVE:
@@ -236,15 +265,15 @@ public class SimpleTWAgent extends TWAgent{
                         trackbackFlag=false;
                         super.refuel();
                         break;
+                    case WAIT:
+                        System.out.println("jus 'angin 'round them obstacles people!");
+                        break;
                     default:
                         System.out.println("jus 'angin 'round them obstacles nigga!");
 
                 }
-            }
-            else
-            {
-                System.out.println("jus 'angin 'round them obstacles nigga!");
-            }
+
+
 
 
         }  catch (CellBlockedException ex) {
@@ -253,7 +282,7 @@ public class SimpleTWAgent extends TWAgent{
     }
 
 
-    private TWDirection getRandomDirection(){
+    protected TWDirection getRandomDirection(){
 
         TWDirection randomDir = TWDirection.values()[this.getEnvironment().random.nextInt(5)];
 

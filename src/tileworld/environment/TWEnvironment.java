@@ -12,10 +12,7 @@ import sim.util.Bag;
 import sim.util.Int2D;
 import tileworld.Parameters;
 import tileworld.TWGUI;
-import tileworld.agent.PQITwo;
-import tileworld.agent.PQIOne;
-import tileworld.agent.SimpleTWAgent;
-import tileworld.agent.TWAgent;
+import tileworld.agent.*;
 
 /**
  * TWEnvironment
@@ -56,7 +53,7 @@ public class TWEnvironment extends SimState implements Steppable {
     private Bag holes;
     private Bag obstacles;
     SimpleTWAgent a;
-    SimpleTWAgent b;
+    SmarterTWAgent b;
     private TWFuelStation fuelingStation;
 
 
@@ -98,17 +95,12 @@ public class TWEnvironment extends SimState implements Steppable {
         //The environment is also stepped each step
 
         schedule.scheduleRepeating(this, 1, 1.0);
-        a = new SimpleTWAgent(10, 1, this, Parameters.defaultFuelLevel);
+        a = new SimpleTWAgent(0, 0, this, Parameters.defaultFuelLevel);
         createAgent(a,2);
-//        b = new SimpleTWAgent(10, 1, this, Parameters.defaultFuelLevel);
-//        createAgent(b,3);
-        //Now we create some agents
-        /*a = new PQIOne(10, 1, this, Parameters.defaultFuelLevel);
-        createAgent(a,2);
-        b = new PQITwo(10, 1, this, Parameters.defaultFuelLevel);
+
+        b = new SmarterTWAgent(1, 1, this, Parameters.defaultFuelLevel);
         createAgent(b,3);
-//      createAgent(new VaisaghAgent(10, 1, this, Parameters.defaultFuelLevel),3);
-*/
+
         
 //        
         //create the fueling station
