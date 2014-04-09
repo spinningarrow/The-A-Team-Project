@@ -47,6 +47,16 @@ public class SmarterTWAgent extends SimpleTWAgent
         return randomDirection;
     }
 
+    protected TWThought think() {
+        TWThought thought = super.thinkHelper();
+
+        if (thought == null) {
+            return new TWThought(TWAction.MOVE, getBoundedDirection());
+        }
+
+        return thought;
+    }
+
     public static Portrayal getPortrayal() {
         //red filled box.
         return new TWAgentPortrayal(Color.RED, Parameters.defaultSensorRange) {

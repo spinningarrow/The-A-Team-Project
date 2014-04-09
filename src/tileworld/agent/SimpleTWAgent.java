@@ -69,7 +69,7 @@ public class SimpleTWAgent extends TWAgent{
         return path!=null && (path.getpath().size()<=fuelLevel) ? path.getpath().size()+1 : -1;
     }
 
-    protected TWThought think() {
+    TWThought thinkHelper() {
         List<TWEntity> entityList = this.getEntitiesInRange();
 
         //refuel
@@ -199,8 +199,19 @@ public class SimpleTWAgent extends TWAgent{
             }
         }
 
-        // Otherwise move randomly till you see something interesting
-       return new TWThought(TWAction.MOVE, getBoundedDirection());
+        return null;
+    }
+
+    protected TWThought think() {
+        TWThought thought = thinkHelper();
+
+        if (thought == null) {
+            // Otherwise move randomly till you see something interesting
+            return new TWThought(TWAction.MOVE, getBoundedDirection());
+
+        }
+
+        return thought;
     }
 
     TWDirection getBoundedDirection() {
@@ -242,6 +253,8 @@ public class SimpleTWAgent extends TWAgent{
         //pickUpTile(Tile)
         //putTileInHole(Hole)
         //refuel()
+
+        System.out.println("Current Position: (" + x + ", " + y + ")");
 
 
         try {
