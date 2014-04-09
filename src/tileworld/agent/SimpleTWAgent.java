@@ -15,6 +15,8 @@ import tileworld.planners.TWPath;
 import java.util.ArrayList;
 import java.util.List;
 
+import static tileworld.environment.TWDirection.*;
+
 /**
  * TWContextBuilder
  *
@@ -90,8 +92,7 @@ public class SimpleTWAgent extends TWAgent{
         }
 
         int threshold = getTrackbackThreshold();
-        if(threshold == -1 && x!=0 && y!=0)
-        {
+        if(threshold == -1 && x!=0 && y!=0) {
             return new TWThought(TWAction.WAIT,null);
         }
 
@@ -217,8 +218,8 @@ public class SimpleTWAgent extends TWAgent{
     TWDirection getBoundedDirection() {
         TWDirection randomDirection;
         int newX =x , newY = y;
-        if(newX >= newY)
-            return TWDirection.W;
+        if(newX > newY)
+            return W;
         else do
         {
             randomDirection = getRandomDirection();
@@ -239,7 +240,7 @@ public class SimpleTWAgent extends TWAgent{
             }
 
 
-        }while (newX >  newY);
+        } while (newX > newY);
         return randomDirection;
 
     }
@@ -297,16 +298,21 @@ public class SimpleTWAgent extends TWAgent{
 
     protected TWDirection getRandomDirection(){
 
-        TWDirection randomDir = TWDirection.values()[this.getEnvironment().random.nextInt(5)];
+        TWDirection randomDir = values()[this.getEnvironment().random.nextInt(5)];
 
-        if(this.getX()>=this.getEnvironment().getxDimension() ){
-            randomDir = TWDirection.W;
-        }else if(this.getX()<=1 ){
-            randomDir = TWDirection.E;
-        }else if(this.getY()<=1 ){
-            randomDir = TWDirection.S;
-        }else if(this.getY()>=this.getEnvironment().getxDimension() ){
-            randomDir = TWDirection.N;
+        switch (randomDir) {
+            case N:
+                if (getY() == 0) return getRandomDirection();
+                break;
+            case E:
+                if (getX() == getEnvironment().getxDimension()) return getRandomDirection();
+                break;
+            case W:
+                if (getX() == 0) return getRandomDirection();
+                break;
+            case S:
+                if (getY() == getEnvironment().getyDimension()) return getRandomDirection();
+                break;
         }
 
        return randomDir;
