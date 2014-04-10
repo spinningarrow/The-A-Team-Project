@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package tileworld.environment;
 
 import java.util.ArrayList;
@@ -53,7 +51,7 @@ public class TWEnvironment extends SimState implements Steppable {
     private Bag holes;
     private Bag obstacles;
     SimpleTWAgent a;
-    SmarterTWAgent b;
+    SimpleTWAgent2 b;
     private TWFuelStation fuelingStation;
 
 
@@ -98,8 +96,8 @@ public class TWEnvironment extends SimState implements Steppable {
         a = new SimpleTWAgent(0, 0, this, Parameters.defaultFuelLevel);
         createAgent(a,2);
 
-//        b = new SmarterTWAgent(1, 1, this, Parameters.defaultFuelLevel);
-//        createAgent(b,3);
+        b = new SimpleTWAgent2(1, 1, this, Parameters.defaultFuelLevel);
+        createAgent(b,3);
 
         
 //        

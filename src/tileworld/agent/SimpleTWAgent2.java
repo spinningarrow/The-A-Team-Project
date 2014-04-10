@@ -3,15 +3,25 @@
  * and open the template in the editor.
  */
 package tileworld.agent;
+
+import sim.display.GUIState;
 import sim.field.grid.ObjectGrid2D;
+import sim.portrayal.Inspector;
+import sim.portrayal.LocationWrapper;
+import sim.portrayal.Portrayal;
 import tileworld.Parameters;
 import tileworld.environment.*;
 import tileworld.exceptions.CellBlockedException;
 import tileworld.planners.AstarPathGenerator;
 import tileworld.planners.TWPath;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import static tileworld.environment.TWDirection.*;
+
+import static tileworld.environment.TWDirection.W;
+import static tileworld.environment.TWDirection.values;
+
 /**
  * TWContextBuilder
  *
@@ -24,9 +34,9 @@ import static tileworld.environment.TWDirection.*;
  * Description:
  *
  */
-public class SimpleTWAgent extends TWAgent{
+public class SimpleTWAgent2 extends TWAgent{
     private boolean trackbackFlag = false;
-    public SimpleTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
+    public SimpleTWAgent2(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
     }
     List<TWEntity> getEntitiesInRange() {
@@ -54,7 +64,7 @@ public class SimpleTWAgent extends TWAgent{
     {
         AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
         TWPath path = astar.findPath(this.x, this.y, 0, 0);
-        return path!=null && (path.getpath().size()<=fuelLevel) ? path.getpath().size()+1 : -1;
+        return path != null && (path.getpath().size() <= fuelLevel) ? path.getpath().size() + 1 : -1;
     }
 
     protected TWPath getNotSoRandomPath() {
@@ -77,9 +87,11 @@ public class SimpleTWAgent extends TWAgent{
         return bottomPath;
     }
 
+
     TWThought thinkHelper() {
 
         List<TWEntity> entityList = this.getEntitiesInRange();
+
         //refuel
         if (this.fuelLevel<1000 && this.x == this.y && this.x == 0) {
             return new TWThought(TWAction.REFUEL,null);
@@ -100,21 +112,21 @@ public class SimpleTWAgent extends TWAgent{
             return new TWThought(TWAction.WAIT,null);
         }
 
-        //System.out.println("THIS IS THE THRESHOLD MOFOs "+threshold);
+        //System.out.println("Simple2 THIS IS THE THRESHOLD MOFOs "+threshold);
         if (this.fuelLevel <= threshold || trackbackFlag) {
             trackbackFlag = true;
             AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
             TWPath path = astar.findPath(this.x, this.y, 0, 0);
-            System.out.println("Tracking back->Simple Score: " + this.score);
+            System.out.println("Simple2 Tracking back->Simple Score: " + this.score);
             if (path != null) {
                 if(this.carriedTiles.size()<3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
-                    System.out.println("Tracking back pickup");
+                    System.out.println("Simple2 Tracking back pickup");
                     System.exit(8);
                     return new TWThought(TWAction.PICKUP,null);
                 }
                 //put down a TILE
                 if(this.carriedTiles.size()>0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
-                    System.out.println("Tracking back putdown");
+                    System.out.println("Simple2 Tracking back putdown");
                     System.exit(2);
                     return new TWThought(TWAction.PUTDOWN,null);
                 }
@@ -123,7 +135,7 @@ public class SimpleTWAgent extends TWAgent{
         }
 
         if (entityList.size() > 0) {
-            System.out.println("I FUCKING FOUND A TILE OR A HOLE!");
+            System.out.println("SIMPLE 2 I FUCKING FOUND A TILE OR A HOLE!");
             // Find astar path to closest hole if we have carried tiles
             // if there is no other tile closer than the nearest hole
             if (this.hasTile()) {
@@ -205,8 +217,8 @@ public class SimpleTWAgent extends TWAgent{
     TWDirection getBoundedDirection() {
         TWDirection randomDirection;
         int newX = x , newY = y;
-        if(newX > newY)
-            return TWDirection.W;
+        if(newX < newY)
+            return TWDirection.E;
         else do
         {
             randomDirection = getRandomDirection();
@@ -225,7 +237,7 @@ public class SimpleTWAgent extends TWAgent{
                     newY +=1;
                     break;
             }
-        } while (newX > newY);
+        } while (newX < newY);
         return randomDirection;
     }
     @Override
@@ -235,11 +247,10 @@ public class SimpleTWAgent extends TWAgent{
         //pickUpTile(Tile)
         //putTileInHole(Hole)
         //refuel()
-        System.out.println("Current Position: (" + x + ", " + y + ")");
+        System.out.println("Simple2 Current Position: (" + x + ", " + y + ")");
         try {
             ObjectGrid2D objectGrid2D = this.getEnvironment().getObjectGrid();
             TWEntity e = (TWEntity) objectGrid2D.get(x, y);
-
             switch (thought.getAction())
             {
                 case MOVE:
@@ -247,18 +258,18 @@ public class SimpleTWAgent extends TWAgent{
                     break;
                 case PICKUP:
                     pickUpTile((TWTile)e);
-                    System.out.println("Tiles: "+this.carriedTiles.size());
+                    System.out.println("Simple2 Tiles: "+this.carriedTiles.size());
                     break;
                 case PUTDOWN:
                     putTileInHole((TWHole)e);
-                    System.out.println("Remaining Tiles: "+this.carriedTiles.size());
+                    System.out.println("Simple2 Remaining Tiles: "+this.carriedTiles.size());
                     break;
                 case REFUEL:
                     trackbackFlag=false;
                     super.refuel();
                     break;
                 case WAIT:
-                    System.out.println("jus 'angin 'round them obstacles people!");
+                    System.out.println("Simple2 jus 'angin 'round them obstacles people!");
                     break;
                 default:
                     System.out.println("jus 'angin 'round them obstacles nigga!");
@@ -307,5 +318,17 @@ public class SimpleTWAgent extends TWAgent{
     @Override
     public String getName() {
         return "Dumb Agent";
+    }
+
+    public static Portrayal getPortrayal() {
+        //red filled box.
+        return new TWAgentPortrayal(Color.RED, Parameters.defaultSensorRange) {
+
+            @Override
+            public Inspector getInspector(LocationWrapper wrapper, GUIState state) {
+                // make the inspector
+                return new AgentInspector(super.getInspector(wrapper, state), wrapper, state);
+            }
+        };
     }
 }
