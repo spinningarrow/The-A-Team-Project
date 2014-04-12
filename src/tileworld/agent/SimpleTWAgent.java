@@ -59,22 +59,47 @@ public class SimpleTWAgent extends TWAgent{
 
     protected TWPath getNotSoRandomPath() {
         int sensorRange = Parameters.defaultSensorRange;
-        //ObjectGrid2D curMemoryGrid = this.getMemory().getMemoryGrid();
-        int topLeftX = (this.getX() - sensorRange - 1) <= 0 ? 0 : this.getX() - sensorRange - 1;
-        int topLeftY = (this.getY() - sensorRange - 1) <= 0 ? 0 : this.getY() - sensorRange - 1;
-        int bottomRightX = (this.getX() + sensorRange + 1) >= Parameters.xDimension ? Parameters.xDimension : this.getX() + sensorRange + 1;
-        int bottomRightY = (this.getY() + sensorRange + 1) >= Parameters.yDimension ? Parameters.yDimension : this.getY() + sensorRange + 1;
-        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
-        TWPath topPath = null, bottomPath = null;
-        if(topLeftX < topLeftY)
-            topPath = astar.findPath(this.x, this.y, topLeftX, topLeftY);
-        if(bottomRightX < bottomRightY)
-            bottomPath = astar.findPath(this.x, this.y, bottomRightX, bottomRightY);
-        if(topPath != null && bottomPath !=null)
-            return topPath.getpath().size() <= bottomPath.getpath().size() ? topPath: bottomPath;
-        if(topPath !=null)
-            return topPath;
-        return bottomPath;
+
+        int topLeftX = (this.getX() - sensorRange - 1) <= 0 ? -1 : this.getX() - sensorRange - 1;
+        int topLeftY = (this.getY() - sensorRange - 1) <= 0 ? -1 : this.getY() - sensorRange - 1;
+        int bottomRightX = (this.getX() + sensorRange + 1) >= Parameters.xDimension ? -1 : this.getX() + sensorRange + 1;
+        int bottomRightY = (this.getY() + sensorRange + 1) >= Parameters.yDimension ? -1 : this.getY() + sensorRange + 1;
+        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, sensorRange * sensorRange);
+        TWPath topLeftPath = null, topRightPath = null, bottomLeftPath = null, bottomRightPath = null;
+        if(topLeftX != -1 && topLeftY != -1 && topLeftX < topLeftY)
+            topLeftPath = astar.findPath(this.x, this.y, topLeftX, topLeftY);
+        if(bottomRightX != -1 && topLeftY != -1 && bottomRightX < topLeftY)
+            topRightPath = astar.findPath(this.x, this.y, bottomRightX, topLeftY);
+        if(topLeftX != -1 && bottomRightY != -1 && topLeftX < bottomRightY)
+            topRightPath = astar.findPath(this.x, this.y, topLeftX, bottomRightY);
+        if(bottomRightX !=-1 && bottomRightY != -1 && bottomRightX < bottomRightY)
+            bottomRightPath = astar.findPath(this.x, this.y, bottomRightX, bottomRightY);
+        ArrayList<TWPath> paths = new ArrayList<TWPath>();
+        if(topLeftPath != null)
+            paths.add(topLeftPath);
+        if(topRightPath != null)
+            paths.add(topRightPath);
+        if(bottomLeftPath != null)
+            paths.add(bottomLeftPath);
+        if(bottomRightPath != null)
+            paths.add(bottomRightPath);
+        return comparePathDistances(paths);
+    }
+
+    TWPath comparePathDistances(List<TWPath> paths)
+    {
+        int minPathLength = Integer.MAX_VALUE, size = 0;
+        TWPath bestPath = null;
+        for(TWPath path: paths)
+        {
+            size = path.getpath().size();
+            if(size < minPathLength)
+            {
+                minPathLength = size;
+                bestPath = path;
+            }
+        }
+        return bestPath;
     }
 
     TWThought thinkHelper() {
@@ -194,6 +219,7 @@ public class SimpleTWAgent extends TWAgent{
     }
     protected TWThought think() {
         TWThought thought = thinkHelper();
+        System.out.println("First Agent Tiles: " + this.carriedTiles.size());
         if (thought == null) {
             TWPath notSoRandomPath = getNotSoRandomPath();
             if(notSoRandomPath != null)
