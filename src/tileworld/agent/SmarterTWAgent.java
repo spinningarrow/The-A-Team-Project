@@ -20,7 +20,7 @@ public class SmarterTWAgent extends SimpleTWAgent
     }
 
     @Override
-    TWDirection getBoundedDirection() {
+    protected TWDirection getBoundedDirection() {
         TWDirection randomDirection;
         int newX =x , newY = y;
         if(newX <= newY)
