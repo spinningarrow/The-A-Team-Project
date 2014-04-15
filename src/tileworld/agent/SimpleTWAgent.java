@@ -157,7 +157,7 @@ public class SimpleTWAgent extends TWAgent {
                 if (path != null) {
                     if(trackbackFlag)
                     {
-                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
                         if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
@@ -186,7 +186,7 @@ public class SimpleTWAgent extends TWAgent {
                 if (path != null) {
                     if(trackbackFlag)
                     {
-                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
                         if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
