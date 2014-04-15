@@ -28,12 +28,16 @@ import static tileworld.environment.TWDirection.*;
 public class SimpleTWAgent extends TWAgent {
 
     private boolean trackbackFlag = false;
+    public static final int REFUEL_THRESHOLD_BUFFER = 20;
+    public static final int ASTAR_MAX_SEARCH_DISTANCE = Parameters.xDimension * Parameters.yDimension;
+
     //private String randomFlag = "";
 
     public SimpleTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
     }
 
+    // Get the tiles or holes that can be seen by the agent
     protected List<TWEntity> getEntitiesInRange() {
         int sensorRange = Parameters.defaultSensorRange;
         List<TWEntity> entityList = new ArrayList<TWEntity>();
@@ -45,10 +49,8 @@ public class SimpleTWAgent extends TWAgent {
         for (int i = topLeftX; i <= bottomRightX; i++) {
             for (int j = topLeftY; j <= bottomRightY; j++) {
                 TWEntity e = (TWEntity) objectGrid.get(i, j);
-                if (e == null) {
-                    continue;
-                }
-                else if (e instanceof TWTile || e instanceof TWHole) {
+
+                if (e instanceof TWTile || e instanceof TWHole) {
                     entityList.add(e);
                 }
             }
@@ -57,7 +59,7 @@ public class SimpleTWAgent extends TWAgent {
     }
     protected int getTrackbackThreshold ()
     {
-        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
         TWPath path = astar.findPath(this.getX(), this.getY(), 0, 0);
         return path != null && (path.getpath().size() <= fuelLevel) ? path.getpath().size() + 1 : -1;
     }
@@ -110,10 +112,10 @@ public class SimpleTWAgent extends TWAgent {
 
     protected TWPath getNotSoRandomPath() {//(TWAgent agent, TWEnvironment environment) {
         //Temp: Chooses a random location and moves towards it
-        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
         while (true) {
             //Generate a random location
-            Int2D target = this.getEnvironment().generateFarRandomLocation(this.getX(), this.getY(), Parameters.defaultSensorRange+1);
+            Int2D target = this.getEnvironment().generateFarRandomLocation(this.getX(), this.getY(), Parameters.defaultSensorRange * 2);
             while(target.getX() > target.getY())
                 target = this.getEnvironment().generateFarRandomLocation(this.getX(), this.getY(), Parameters.defaultSensorRange+1);
             TWPath pathFound = astar.findPath(this.getX(), this.getY(), target.getX(), target.getY());
@@ -140,6 +142,7 @@ public class SimpleTWAgent extends TWAgent {
 //        return bestPath;
 //    }
 
+    // Decide what to do if there are tiles or holes within range
     protected TWThought getThoughtForEntitiesRange(List<TWEntity> entityList)
     {
         if (entityList.size() > 0) {
@@ -151,29 +154,36 @@ public class SimpleTWAgent extends TWAgent {
             double minTileDistance = Double.MAX_VALUE;
             TWHole nearestHole = null;
             TWTile nearestTile = null;
+
             for (TWEntity entity : entityList) {
+
+                double distance = entity.getDistanceTo(this);
+
                 if (entity instanceof TWHole) {
-                    double distance = entity.getDistanceTo(this);
                     if (distance < minHoleDistance) {
                         minHoleDistance = distance;
                         nearestHole = (TWHole) entity;
                     }
                 }
                 else if (entity instanceof TWTile) {
-                    double distance = entity.getDistanceTo(this);
                     if (distance < minTileDistance) {
                         minTileDistance = distance;
                         nearestTile = (TWTile) entity;
                     }
                 }
             }
-            if ((this.carriedTiles.size() == 3 && nearestHole != null) || this.hasTile() && minHoleDistance < minTileDistance) {
-                AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+
+            // If can't pick up any more tiles or some tiles are being carried and there is a hole closer than a tile
+            if (nearestHole != null && (this.carriedTiles.size() == 3 || this.hasTile() && minHoleDistance < minTileDistance)) {
+                AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
                 TWPath path = astar.findPath(this.getX(), this.getY(), nearestHole.getX(), nearestHole.getY());
+
                 if (path != null) {
+
+                    // If on the way to the fuel station, check if there's enough fuel to deviate from the path
                     if(trackbackFlag)
                     {
-                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
                         if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
@@ -183,23 +193,14 @@ public class SimpleTWAgent extends TWAgent {
                 }
             }
 //            }
-            // Otherwise find astar path to closest tile
+
+            // Otherwise if there is a tile nearby, pick it up
             else if (this.carriedTiles.size() < 3 && nearestTile != null) {
-//                double minDistance = Double.MAX_VALUE;
-//                TWTile nearestTile = null;
-//                for (TWEntity entity : entityList) {
-//                    if (entity instanceof TWTile) {
-//                        double distance = entity.getDistanceTo(this);
-//                        if (distance < minDistance) {
-//                            minDistance = distance;
-//                            nearestTile = (TWTile) entity;
-//                        }
-//                    }
-//                }
-//                if (nearestTile != null) {
-                AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+                AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
                 TWPath path = astar.findPath(this.getX(), this.getY(), nearestTile.getX(), nearestTile.getY());
                 if (path != null) {
+
+                    // If on the way to the fuel station, check if there's enough fuel to deviate from the path
                     if(trackbackFlag)
                     {
                         AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
@@ -210,63 +211,62 @@ public class SimpleTWAgent extends TWAgent {
                     }
                     return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
                 }
-//                }
             }
         }
         return null;
     }
 
+    // A helper method used by the agent's think() method (refactored so that agent can be subclassed)
     protected TWThought thinkHelper() {
 
         List<TWEntity> entityList = this.getEntitiesInRange();
-        //refuel
+        // If I'm at the fuel station, refuel
         if (this.fuelLevel < 1000 && this.x == this.y && this.x == 0) {
             return new TWThought(TWAction.REFUEL, TWDirection.Z);
         }
 
-        //pick up a TILE
+        // When standing on a tile, pick it up
         if(this.carriedTiles.size() < 3 && this.getEnvironment().getObjectGrid().get(this.getX(), this.getY()) instanceof TWTile){
             return new TWThought(TWAction.PICKUP, TWDirection.Z);
         }
 
-        //put down a TILE
-        if(this.carriedTiles.size() > 0 && this.getEnvironment().getObjectGrid().get(this.getX(), this.getY()) instanceof TWHole){
+        // When standing over a hole, drop a tile
+        if(this.hasTile() && this.getEnvironment().getObjectGrid().get(this.getX(), this.getY()) instanceof TWHole){
             return new TWThought(TWAction.PUTDOWN, TWDirection.Z);
         }
 
+        // Decide whether refueling is needed
         int threshold = getTrackbackThreshold();
         if(threshold == -1 && x != 0 && y != 0) {
             return new TWThought(TWAction.WAIT, TWDirection.Z);
         }
 
-        //System.out.println("THIS IS THE THRESHOLD MOFOs "+threshold);
-        if (this.fuelLevel <= threshold + 20 || trackbackFlag) {
+        // If fuel is low or agent is already tracking back
+        if (this.fuelLevel <= threshold + REFUEL_THRESHOLD_BUFFER || trackbackFlag) {
             trackbackFlag = true;
-            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+
+            // Find a path to the fuel station from the current position
+            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
             TWPath path = astar.findPath(this.getX(), this.getY(), 0, 0);
+
             System.out.println("Tracking back->Simple Score: " + this.score);
+
             if (path != null) {
+                // Decide whether to deviate or not from the path if a tile or a hole is within range
                 TWThought currentBestThought = getThoughtForEntitiesRange(entityList);
-                if(currentBestThought != null)
+                if(currentBestThought != null) {
                     return currentBestThought;
-//                if(this.carriedTiles.size()<3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
-//                    System.out.println("Tracking back pickup");
-//                    System.exit(8);
-//                    return new TWThought(TWAction.PICKUP,null);
-//                }
-//                //put down a TILE
-//                if(this.carriedTiles.size()>0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
-//                    System.out.println("Tracking back putdown");
-//                    System.exit(2);
-//                    return new TWThought(TWAction.PUTDOWN,null);
-//                }
+                }
                 return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
             }
         }
 
+        // Fuel level is normal and there are tiles or holes within range
         TWThought currentBestThought = getThoughtForEntitiesRange(entityList);
-        if(currentBestThought != null)
+        if(currentBestThought != null) {
             return currentBestThought;
+        }
+
         /* Idea here is that if we are carrying no tiles and no tiles are sensed in our vision field
          * then we retrieve the last tile from our memory and generate a path towards it. Eventually, if we
          * come across a closer tile then the agent will automatically move to it (execute one of the blocks above)
@@ -276,11 +276,11 @@ public class SimpleTWAgent extends TWAgent {
         AstarPathGenerator astarTilePath = null, astarHolePath = null;
         TWPath tilePath = null, holePath = null;
         if(tile != null && !isObjectInSensorRange(tile) && this.carriedTiles.size()<3) {
-            astarTilePath = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+            astarTilePath = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
             tilePath = astarTilePath.findPath(this.getX(), this.getY(), tile.getX(), tile.getY());
         }
         if(hole != null && !isObjectInSensorRange(hole) && this.carriedTiles.size()>0) {
-            astarHolePath = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+            astarHolePath = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
             holePath = astarHolePath.findPath(this.getX(), this.getY(), hole.getX(), hole.getY());
         }
         if(tilePath != null && holePath != null)
