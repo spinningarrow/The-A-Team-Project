@@ -62,8 +62,14 @@ public class SimpleTWAgent extends TWAgent {
     }
 
     protected TWPath getNotSoRandomPath() {
+
+        int sensorRange = Parameters.defaultSensorRange;
+        if(this.getX() > this.getY()) {
+            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, sensorRange * sensorRange);
+            return astar.findPath(this.x, this.y, this.x, Parameters.yDimension - 1);
+        }
         //if(randomFlag.equalsIgnoreCase("")) {
-            int sensorRange = Parameters.defaultSensorRange;
+
             int topLeftX = (this.getX() - sensorRange - 1) <= 0 ? -1 : this.getX() - sensorRange - 1;
             int topLeftY = (this.getY() - sensorRange - 1) <= 0 ? -1 : this.getY() - sensorRange - 1;
             int bottomRightX = (this.getX() + sensorRange + 1) >= Parameters.xDimension ? -1 : this.getX() + sensorRange + 1;
@@ -118,83 +124,48 @@ public class SimpleTWAgent extends TWAgent {
         return bestPath;
     }
 
-    protected TWThought thinkHelper() {
-
-        List<TWEntity> entityList = this.getEntitiesInRange();
-        //refuel
-        if (this.fuelLevel < 1000 && this.x == this.y && this.x == 0) {
-            return new TWThought(TWAction.REFUEL, null);
-        }
-
-        //pick up a TILE
-        if(this.carriedTiles.size() < 3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
-            return new TWThought(TWAction.PICKUP, null);
-        }
-
-        //put down a TILE
-        if(this.carriedTiles.size() > 0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
-            return new TWThought(TWAction.PUTDOWN, null);
-        }
-
-        int threshold = getTrackbackThreshold();
-        if(threshold == -1 && x != 0 && y != 0) {
-            return new TWThought(TWAction.WAIT, null);
-        }
-
-        //System.out.println("THIS IS THE THRESHOLD MOFOs "+threshold);
-        if (this.fuelLevel <= threshold || trackbackFlag) {
-            trackbackFlag = true;
-            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
-            TWPath path = astar.findPath(this.x, this.y, 0, 0);
-            System.out.println("Tracking back->Simple Score: " + this.score);
-            if (path != null) {
-//                if(this.carriedTiles.size()<3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
-//                    System.out.println("Tracking back pickup");
-//                    System.exit(8);
-//                    return new TWThought(TWAction.PICKUP,null);
-//                }
-//                //put down a TILE
-//                if(this.carriedTiles.size()>0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
-//                    System.out.println("Tracking back putdown");
-//                    System.exit(2);
-//                    return new TWThought(TWAction.PUTDOWN,null);
-//                }
-                return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
-            }
-        }
-
+    protected TWThought getThoughtForEntitiesRange(List<TWEntity> entityList)
+    {
         if (entityList.size() > 0) {
             System.out.println("I FUCKING FOUND A TILE OR A HOLE!");
             // Find astar path to closest hole if we have carried tiles
             // if there is no other tile closer than the nearest hole
 //            if (this.hasTile()) {
-                double minHoleDistance = Double.MAX_VALUE;
-                double minTileDistance = Double.MAX_VALUE;
-                TWHole nearestHole = null;
-                TWTile nearestTile = null;
-                for (TWEntity entity : entityList) {
-                    if (entity instanceof TWHole) {
-                        double distance = entity.getDistanceTo(this);
-                        if (distance < minHoleDistance) {
-                            minHoleDistance = distance;
-                            nearestHole = (TWHole) entity;
-                        }
-                    }
-                    else if (entity instanceof TWTile) {
-                        double distance = entity.getDistanceTo(this);
-                        if (distance < minTileDistance) {
-                            minTileDistance = distance;
-                            nearestTile = (TWTile) entity;
-                        }
+            double minHoleDistance = Double.MAX_VALUE;
+            double minTileDistance = Double.MAX_VALUE;
+            TWHole nearestHole = null;
+            TWTile nearestTile = null;
+            for (TWEntity entity : entityList) {
+                if (entity instanceof TWHole) {
+                    double distance = entity.getDistanceTo(this);
+                    if (distance < minHoleDistance) {
+                        minHoleDistance = distance;
+                        nearestHole = (TWHole) entity;
                     }
                 }
-                if ((this.carriedTiles.size() == 3 && nearestHole != null) || this.hasTile() && minHoleDistance < minTileDistance) {
-                    AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
-                    TWPath path = astar.findPath(x, y, nearestHole.getX(), nearestHole.getY());
-                    if (path != null) {
-                        return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
+                else if (entity instanceof TWTile) {
+                    double distance = entity.getDistanceTo(this);
+                    if (distance < minTileDistance) {
+                        minTileDistance = distance;
+                        nearestTile = (TWTile) entity;
                     }
                 }
+            }
+            if ((this.carriedTiles.size() == 3 && nearestHole != null) || this.hasTile() && minHoleDistance < minTileDistance) {
+                AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+                TWPath path = astar.findPath(x, y, nearestHole.getX(), nearestHole.getY());
+                if (path != null) {
+                    if(trackbackFlag)
+                    {
+                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+
+                        TWPath path1 = astar.findPath(x, y, 0, 0);
+                        if(!(this.fuelLevel - path.getpath().size() <= path1.getpath().size()))
+                            return null;
+                    }
+                    return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
+                }
+            }
 //            }
             // Otherwise find astar path to closest tile
             else if (this.carriedTiles.size() < 3 && nearestTile != null) {
@@ -210,20 +181,82 @@ public class SimpleTWAgent extends TWAgent {
 //                    }
 //                }
 //                if (nearestTile != null) {
-                    AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
-                    TWPath path = astar.findPath(x, y, nearestTile.getX(), nearestTile.getY());
-                    if (path != null) {
-                        return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
+                AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+                TWPath path = astar.findPath(x, y, nearestTile.getX(), nearestTile.getY());
+                if (path != null) {
+                    if(trackbackFlag)
+                    {
+                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+
+                        TWPath path1 = astar.findPath(x, y, 0, 0);
+                        if(!(this.fuelLevel - path.getpath().size() <= path1.getpath().size()))
+                            return null;
                     }
+                    return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
+                }
 //                }
             }
         }
+        return null;
+    }
+
+    protected TWThought thinkHelper() {
+
+        List<TWEntity> entityList = this.getEntitiesInRange();
+        //refuel
+        if (this.fuelLevel < 1000 && this.x == this.y && this.x == 0) {
+            return new TWThought(TWAction.REFUEL, TWDirection.Z);
+        }
+
+        //pick up a TILE
+        if(this.carriedTiles.size() < 3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
+            return new TWThought(TWAction.PICKUP, TWDirection.Z);
+        }
+
+        //put down a TILE
+        if(this.carriedTiles.size() > 0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
+            return new TWThought(TWAction.PUTDOWN, TWDirection.Z);
+        }
+
+        int threshold = getTrackbackThreshold();
+        if(threshold == -1 && x != 0 && y != 0) {
+            return new TWThought(TWAction.WAIT, TWDirection.Z);
+        }
+
+        //System.out.println("THIS IS THE THRESHOLD MOFOs "+threshold);
+        if (this.fuelLevel <= threshold + 20 || trackbackFlag) {
+            trackbackFlag = true;
+            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
+            TWPath path = astar.findPath(this.x, this.y, 0, 0);
+            System.out.println("Tracking back->Simple Score: " + this.score);
+            if (path != null) {
+                TWThought currentBestThought = getThoughtForEntitiesRange(entityList);
+                if(currentBestThought != null)
+                    return currentBestThought;
+//                if(this.carriedTiles.size()<3 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWTile){
+//                    System.out.println("Tracking back pickup");
+//                    System.exit(8);
+//                    return new TWThought(TWAction.PICKUP,null);
+//                }
+//                //put down a TILE
+//                if(this.carriedTiles.size()>0 && this.getEnvironment().getObjectGrid().get(x,y) instanceof TWHole){
+//                    System.out.println("Tracking back putdown");
+//                    System.exit(2);
+//                    return new TWThought(TWAction.PUTDOWN,null);
+//                }
+                return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
+            }
+        }
+
+        TWThought currentBestThought = getThoughtForEntitiesRange(entityList);
+        if(currentBestThought != null)
+            return currentBestThought;
         /* Idea here is that if we are carrying no tiles and no tiles are sensed in our vision field
          * then we retrieve the last tile from our memory and generate a path towards it. Eventually, if we
          * come across a closer tile then the agent will automatically move to it (execute one of the blocks above)
          * or it will come to this point and continue to move to the same tile we identified. */
         TWTile tile = this.getMemory().getNearbyTile(this.x, this.y, 15);
-        TWHole hole = this.getMemory().getNearbyHole(this.x,this.y,15);
+        TWHole hole = this.getMemory().getNearbyHole(this.x,this.y, 15);
         AstarPathGenerator astarTilePath = null, astarHolePath = null;
         TWPath tilePath = null, holePath = null;
         if(tile != null && !isObjectInSensorRange(tile) && this.carriedTiles.size()<3) {
