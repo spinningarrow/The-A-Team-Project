@@ -187,7 +187,7 @@ public class SimpleTWAgent extends TWAgent {
                         // If the path to the nearest entity + path from entity to fuel station is too costly, go
                         // directly to the fuel station
                         if(pathNearestHoleToFuel != null && pathToNearestHole.getpath().size() + pathNearestHoleToFuel.getpath().size() > this.fuelLevel) {
-                            new TWThought(TWAction.MOVE, pathToFuelStation.getStep(0).getDirection());
+                            return new TWThought(TWAction.MOVE, pathToFuelStation.getStep(0).getDirection());
                         }
                     }
                     return new TWThought(TWAction.MOVE, pathToNearestHole.getStep(0).getDirection());
