@@ -11,6 +11,7 @@ import tileworld.planners.AstarPathGenerator;
 import tileworld.planners.TWPath;
 import java.util.ArrayList;
 import java.util.List;
+import sim.util.Int2D;
 import static tileworld.environment.TWDirection.*;
 /**
  * TWContextBuilder
@@ -61,68 +62,83 @@ public class SimpleTWAgent extends TWAgent {
         return path != null && (path.getpath().size() <= fuelLevel) ? path.getpath().size() + 1 : -1;
     }
 
-    protected TWPath getNotSoRandomPath() {
+//    protected TWPath getNotSoRandomPath() {
+//
+//        int sensorRange = Parameters.defaultSensorRange;
+//        if(this.getX() > this.getY()) {
+//            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, sensorRange * sensorRange);
+//            return astar.findPath(this.getX(), this.getY(), this.getX(), Parameters.yDimension - 1);
+//        }
+//        //if(randomFlag.equalsIgnoreCase("")) {
+//
+//            int topLeftX = (this.getX() - sensorRange - 1) <= 0 ? -1 : this.getX() - sensorRange - 1;
+//            int topLeftY = (this.getY() - sensorRange - 1) <= 0 ? -1 : this.getY() - sensorRange - 1;
+//            int bottomRightX = (this.getX() + sensorRange + 1) >= Parameters.xDimension ? -1 : this.getX() + sensorRange + 1;
+//            int bottomRightY = (this.getY() + sensorRange + 1) >= Parameters.yDimension ? -1 : this.getY() + sensorRange + 1;
+//
+//            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, sensorRange * sensorRange);
+//            TWPath topLeftPath = null, topRightPath = null, bottomLeftPath = null, bottomRightPath = null;
+//
+//            if (topLeftX != -1 && topLeftY != -1)//&& topLeftX < topLeftY)
+//                topLeftPath = astar.findPath(this.getX(), this.getY(), topLeftX, topLeftY);
+//            if (bottomRightX != -1 && topLeftY != -1)//&& bottomRightX < topLeftY)
+//                topRightPath = astar.findPath(this.getX(), this.getY(), bottomRightX, topLeftY);
+//            if (topLeftX != -1 && bottomRightY != -1)//&& topLeftX < bottomRightY)
+//                topRightPath = astar.findPath(this.getX(), this.getY(), topLeftX, bottomRightY);
+//            if (bottomRightX != -1 && bottomRightY != -1)// && bottomRightX < bottomRightY)
+//                bottomRightPath = astar.findPath(this.getX(), this.getY(), bottomRightX, bottomRightY);
+//
+//            ArrayList<TWPath> paths = new ArrayList<TWPath>();
+//            if (topLeftPath != null)
+//                paths.add(topLeftPath);
+//            if (topRightPath != null)
+//                paths.add(topRightPath);
+//            if (bottomLeftPath != null)
+//                paths.add(bottomLeftPath);
+//            if (bottomRightPath != null)
+//                paths.add(bottomRightPath);
+//
+//            TWPath path = comparePathDistances(paths);
+//            return path;
+//        //}
+//        //}
+////        if(randomFlag.equalsIgnoreCase("TL"))
+////        if(randomFlag.equalsIgnoreCase("TR"))
+////        if(randomFlag.equalsIgnoreCase("BL"))
+////        if(randomFlag.equalsIgnoreCase("BR"))
+//    }
 
-        int sensorRange = Parameters.defaultSensorRange;
-        if(this.getX() > this.getY()) {
-            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, sensorRange * sensorRange);
-            return astar.findPath(this.getX(), this.getY(), this.getX(), Parameters.yDimension - 1);
-        }
-        //if(randomFlag.equalsIgnoreCase("")) {
-
-            int topLeftX = (this.getX() - sensorRange - 1) <= 0 ? -1 : this.getX() - sensorRange - 1;
-            int topLeftY = (this.getY() - sensorRange - 1) <= 0 ? -1 : this.getY() - sensorRange - 1;
-            int bottomRightX = (this.getX() + sensorRange + 1) >= Parameters.xDimension ? -1 : this.getX() + sensorRange + 1;
-            int bottomRightY = (this.getY() + sensorRange + 1) >= Parameters.yDimension ? -1 : this.getY() + sensorRange + 1;
-
-            AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, sensorRange * sensorRange);
-            TWPath topLeftPath = null, topRightPath = null, bottomLeftPath = null, bottomRightPath = null;
-
-            if (topLeftX != -1 && topLeftY != -1)//&& topLeftX < topLeftY)
-                topLeftPath = astar.findPath(this.getX(), this.getY(), topLeftX, topLeftY);
-            if (bottomRightX != -1 && topLeftY != -1)//&& bottomRightX < topLeftY)
-                topRightPath = astar.findPath(this.getX(), this.getY(), bottomRightX, topLeftY);
-            if (topLeftX != -1 && bottomRightY != -1)//&& topLeftX < bottomRightY)
-                topRightPath = astar.findPath(this.getX(), this.getY(), topLeftX, bottomRightY);
-            if (bottomRightX != -1 && bottomRightY != -1)// && bottomRightX < bottomRightY)
-                bottomRightPath = astar.findPath(this.getX(), this.getY(), bottomRightX, bottomRightY);
-
-            ArrayList<TWPath> paths = new ArrayList<TWPath>();
-            if (topLeftPath != null)
-                paths.add(topLeftPath);
-            if (topRightPath != null)
-                paths.add(topRightPath);
-            if (bottomLeftPath != null)
-                paths.add(bottomLeftPath);
-            if (bottomRightPath != null)
-                paths.add(bottomRightPath);
-
-            TWPath path = comparePathDistances(paths);
-            return path;
-        //}
-        //}
-//        if(randomFlag.equalsIgnoreCase("TL"))
-//        if(randomFlag.equalsIgnoreCase("TR"))
-//        if(randomFlag.equalsIgnoreCase("BL"))
-//        if(randomFlag.equalsIgnoreCase("BR"))
-    }
-
-    protected TWPath comparePathDistances(List<TWPath> paths)
-    {
-        int minPathLength = Integer.MAX_VALUE, size = 0;
-        TWPath bestPath = null;
-
-        for(TWPath path: paths)
-        {
-            size = path.getpath().size();
-            if(size < minPathLength)
-            {
-                minPathLength = size;
-                bestPath = path;
+    protected TWPath getNotSoRandomPath() {//(TWAgent agent, TWEnvironment environment) {
+        //Temp: Chooses a random location and moves towards it
+        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
+        while (true) {
+            //Generate a random location
+            Int2D target = this.getEnvironment().generateFarRandomLocation(this.getX(), this.getY(), Parameters.defaultSensorRange+1);
+            while(target.getX() > target.getY())
+                target = this.getEnvironment().generateFarRandomLocation(this.getX(), this.getY(), Parameters.defaultSensorRange+1);
+            TWPath pathFound = astar.findPath(this.getX(), this.getY(), target.getX(), target.getY());
+            if (pathFound != null) {
+                return pathFound;
             }
         }
-        return bestPath;
     }
+
+//    protected TWPath comparePathDistances(List<TWPath> paths)
+//    {
+//        int minPathLength = Integer.MAX_VALUE, size = 0;
+//        TWPath bestPath = null;
+//
+//        for(TWPath path: paths)
+//        {
+//            size = path.getpath().size();
+//            if(size < minPathLength)
+//            {
+//                minPathLength = size;
+//                bestPath = path;
+//            }
+//        }
+//        return bestPath;
+//    }
 
     protected TWThought getThoughtForEntitiesRange(List<TWEntity> entityList)
     {
@@ -157,7 +173,7 @@ public class SimpleTWAgent extends TWAgent {
                 if (path != null) {
                     if(trackbackFlag)
                     {
-                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, getEnvironment().getxDimension() * getEnvironment().getyDimension());
+                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
                         if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
@@ -186,7 +202,7 @@ public class SimpleTWAgent extends TWAgent {
                 if (path != null) {
                     if(trackbackFlag)
                     {
-                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, getEnvironment().getxDimension() * getEnvironment().getyDimension());
+                        AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
                         if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
