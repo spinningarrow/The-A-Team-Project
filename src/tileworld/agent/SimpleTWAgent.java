@@ -270,33 +270,31 @@ public class SimpleTWAgent extends TWAgent {
             return currentBestThought;
         }
 
-        /* Idea here is that if we are carrying no tiles and no tiles are sensed in our vision field
-         * then we retrieve the last tile from our memory and generate a path towards it. Eventually, if we
-         * come across a closer tile then the agent will automatically move to it (execute one of the blocks above)
-         * or it will come to this point and continue to move to the same tile we identified. */
-        TWTile tile = this.getMemory().getNearbyTile(this.getX(), this.getY(), 15);
-        TWHole hole = this.getMemory().getNearbyHole(this.getX(), this.getY(), 15);
-        AstarPathGenerator astarTilePath = null, astarHolePath = null;
+        // If agent sees nothing in its sensor range, retrieve tiles and holes seen nearby from the memory and generate
+        // a path towards them; eventually they will come within range (handled above) or we'll keep moving towards them
+        TWTile recentTile = getMemory().getNearbyTile(getX(), getY(), 15);
+        TWHole recentHole = getMemory().getNearbyHole(getX(), getY(), 15);
+
+        AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
         TWPath tilePath = null, holePath = null;
-        if(tile != null && !isObjectInSensorRange(tile) && this.carriedTiles.size()<3) {
-            astarTilePath = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
-            tilePath = astarTilePath.findPath(this.getX(), this.getY(), tile.getX(), tile.getY());
+
+        // Find paths to a recently seen tile and hole (if any)
+        if(recentTile != null && !isObjectInSensorRange(recentTile) && this.carriedTiles.size() < 3) {
+            tilePath = astar.findPath(this.getX(), this.getY(), recentTile.getX(), recentTile.getY());
         }
-        if(hole != null && !isObjectInSensorRange(hole) && this.carriedTiles.size()>0) {
-            astarHolePath = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
-            holePath = astarHolePath.findPath(this.getX(), this.getY(), hole.getX(), hole.getY());
+        if(recentHole != null && !isObjectInSensorRange(recentHole) && this.hasTile()) {
+            holePath = astar.findPath(this.getX(), this.getY(), recentHole.getX(), recentHole.getY());
         }
-        if(tilePath != null && holePath != null)
-        {
-            if(tilePath.getpath().size()<=holePath.getpath().size())
-                return new TWThought(TWAction.MOVE, tilePath.getStep(0).getDirection());
-            return new TWThought(TWAction.MOVE, holePath.getStep(0).getDirection());
-        }
-        if(tilePath != null)
-            return new TWThought(TWAction.MOVE, tilePath.getStep(0).getDirection());
+
+        // If there is a path to a recently seen hole, go to it (score is more important than number of tiles carried)
         if(holePath != null)
             return new TWThought(TWAction.MOVE, holePath.getStep(0).getDirection());
 
+        // Otherwise go to a recently seen tile
+        if(tilePath != null)
+            return new TWThought(TWAction.MOVE, tilePath.getStep(0).getDirection());
+
+        // We got nothing, defer to the think() method
         return null;
     }
 
