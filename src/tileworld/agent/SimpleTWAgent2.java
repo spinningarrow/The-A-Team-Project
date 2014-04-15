@@ -42,6 +42,7 @@ public class SimpleTWAgent2 extends TWAgent {
     }
 
     protected List<TWEntity> getEntitiesInRange() {
+
         int sensorRange = Parameters.defaultSensorRange;
         List<TWEntity> entityList = new ArrayList<TWEntity>();
         ObjectGrid2D objectGrid = this.getEnvironment().getObjectGrid();
@@ -159,7 +160,7 @@ public class SimpleTWAgent2 extends TWAgent {
                         AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
-                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() <= this.fuelLevel))
+                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
                             return new TWThought(TWAction.MOVE, path1.getStep(0).getDirection());
                     }
                     return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
@@ -188,7 +189,7 @@ public class SimpleTWAgent2 extends TWAgent {
                         AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
-                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() <= this.fuelLevel))
+                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1  < this.fuelLevel))
                             return new TWThought(TWAction.MOVE, path1.getStep(0).getDirection());
                     }
                     return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());

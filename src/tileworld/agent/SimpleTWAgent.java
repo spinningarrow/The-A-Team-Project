@@ -58,7 +58,7 @@ public class SimpleTWAgent extends TWAgent {
     {
         AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
         TWPath path = astar.findPath(this.getX(), this.getY(), 0, 0);
-        return path!=null && (path.getpath().size()<=fuelLevel) ? path.getpath().size()+1 : -1;
+        return path != null && (path.getpath().size() <= fuelLevel) ? path.getpath().size() + 1 : -1;
     }
 
     protected TWPath getNotSoRandomPath() {
@@ -160,7 +160,7 @@ public class SimpleTWAgent extends TWAgent {
                         AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
-                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() <= this.fuelLevel))
+                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
                             new TWThought(TWAction.MOVE, path1.getStep(0).getDirection());
                     }
                     return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
@@ -189,7 +189,7 @@ public class SimpleTWAgent extends TWAgent {
                         AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
 
                         TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
-                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() <= this.fuelLevel))
+                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() + 1 < this.fuelLevel))
                             return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
                     }
                     return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
