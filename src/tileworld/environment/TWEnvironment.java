@@ -3,11 +3,14 @@ package tileworld.environment;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import sim.display.Console;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.ObjectGrid2D;
 import sim.util.Bag;
 import sim.util.Int2D;
+import sim.util.gui.DisclosurePanel;
 import tileworld.Parameters;
 import tileworld.TWGUI;
 import tileworld.agent.*;
@@ -52,6 +55,7 @@ public class TWEnvironment extends SimState implements Steppable {
     private Bag obstacles;
     SimpleTWAgent a;
     SimpleTWAgent2 b;
+    PQIOne c;
     private TWFuelStation fuelingStation;
 
 
@@ -96,9 +100,11 @@ public class TWEnvironment extends SimState implements Steppable {
         a = new SimpleTWAgent(0, 0, this, Parameters.defaultFuelLevel);
         createAgent(a,2);
 
-        b = new SimpleTWAgent2(1, 1, this, Parameters.defaultFuelLevel);
-        createAgent(b,3);
+//        b = new SimpleTWAgent2(1, 1, this, Parameters.defaultFuelLevel);
+//        createAgent(b,3);
 
+//          c = new PQIOne(0, 0, this, Parameters.defaultFuelLevel);
+//          createAgent(c,2);
         
 //        
         //create the fueling station
@@ -321,6 +327,7 @@ public class TWEnvironment extends SimState implements Steppable {
         schedule.scheduleRepeating(a, ordering, 1.0);
         if(TWGUI.instance !=null){
             TWGUI.instance.addMemoryPortrayal(a);
+
         }
     }
 

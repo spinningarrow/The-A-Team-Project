@@ -317,7 +317,7 @@ public class SimpleTWAgent2 extends TWAgent{
 
     @Override
     public String getName() {
-        return "Dumb Agent";
+        return "Simple Agent 2";
     }
 
     public static Portrayal getPortrayal() {

@@ -201,7 +201,7 @@ public class TWGUI extends GUIState {
     /**
      * Adds a portrayal of the memory of the agent.
      * 
-     * @param agent 
+     * @param agent
      */
     public void addMemoryPortrayal(TWAgent agent) {
         ObjectGridPortrayal2D memoryPortrayal = new ObjectGridPortrayal2D();
@@ -213,6 +213,7 @@ public class TWGUI extends GUIState {
         display.attach(memoryPortrayal, agent.getName() +"'s Memory");
     }
 
+
     public void resetDisplay() {
         display.detatchAll();
         display.attach(objectGridPortrayal, "Tileworld objects");
@@ -221,6 +222,6 @@ public class TWGUI extends GUIState {
         
 
         // specify the backdrop color  -- what gets painted behind the displays
-        display.setBackdrop(Color.gray);
+        display.setBackdrop(Color.lightGray);
     }
 }
