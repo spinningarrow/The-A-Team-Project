@@ -152,15 +152,15 @@ public class SimpleTWAgent2 extends TWAgent {
             }
             if ((this.carriedTiles.size() == 3 && nearestHole != null) || this.hasTile() && minHoleDistance < minTileDistance) {
                 AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
-                TWPath path = astar.findPath(x, y, nearestHole.getX(), nearestHole.getY());
+                TWPath path = astar.findPath(this.getX(), this.getY(), nearestHole.getX(), nearestHole.getY());
                 if (path != null) {
                     if(trackbackFlag)
                     {
                         AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
 
-                        TWPath path1 = astar.findPath(x, y, 0, 0);
-                        if(!(this.fuelLevel - path.getpath().size() <= path1.getpath().size()))
-                            return null;
+                        TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
+                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() <= this.fuelLevel))
+                            return new TWThought(TWAction.MOVE, path1.getStep(0).getDirection());
                     }
                     return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
                 }
@@ -181,15 +181,15 @@ public class SimpleTWAgent2 extends TWAgent {
 //                }
 //                if (nearestTile != null) {
                 AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
-                TWPath path = astar.findPath(x, y, nearestTile.getX(), nearestTile.getY());
+                TWPath path = astar.findPath(this.getX(), this.getY(), nearestTile.getX(), nearestTile.getY());
                 if (path != null) {
                     if(trackbackFlag)
                     {
                         AstarPathGenerator astar1 = new AstarPathGenerator(getEnvironment(), this, Parameters.defaultSensorRange * Parameters.defaultSensorRange);
 
-                        TWPath path1 = astar.findPath(x, y, 0, 0);
-                        if(!(this.fuelLevel - path.getpath().size() <= path1.getpath().size()))
-                            return null;
+                        TWPath path1 = astar1.findPath(this.getX(), this.getY(), 0, 0);
+                        if(path1 != null && !(path.getpath().size() + path1.getpath().size() <= this.fuelLevel))
+                            return new TWThought(TWAction.MOVE, path1.getStep(0).getDirection());
                     }
                     return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
                 }
@@ -227,7 +227,7 @@ public class SimpleTWAgent2 extends TWAgent {
         if (this.fuelLevel <= threshold || trackbackFlag) {
             trackbackFlag = true;
             AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, Parameters.xDimension * Parameters.yDimension);
-            TWPath path = astar.findPath(this.getX(),this.getY(), 0, 0);
+            TWPath path = astar.findPath(this.getX(), this.getY(), 0, 0);
             System.out.println("Simple2 Tracking back->Score: " + this.score);
             if (path != null) {
                 TWThought currentBestThought = getThoughtForEntitiesRange(entityList);
@@ -244,7 +244,7 @@ public class SimpleTWAgent2 extends TWAgent {
 ////                    System.exit(2);
 //                    return new TWThought(TWAction.PUTDOWN, null);
 //                }
-                return new TWThought(TWAction.MOVE,path.getStep(0).getDirection());
+                return new TWThought(TWAction.MOVE, path.getStep(0).getDirection());
             }
         }
 
