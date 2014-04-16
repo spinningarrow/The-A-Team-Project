@@ -279,11 +279,21 @@ public class SimpleTWAgent extends TWAgent {
         TWPath tilePath = null, holePath = null;
 
         // Find paths to a recently seen tile and hole (if any)
-        if(recentTile != null && !isObjectInSensorRange(recentTile) && this.carriedTiles.size() < 3) {
-            tilePath = astar.findPath(this.getX(), this.getY(), recentTile.getX(), recentTile.getY());
+        if(recentTile != null && this.carriedTiles.size() < 3) {
+            if (isObjectInSensorRange(recentTile) && !getEntitiesInRange().contains(recentTile)) {
+                getMemory().removeObject(recentTile);
+            }
+            else {
+                tilePath = astar.findPath(this.getX(), this.getY(), recentTile.getX(), recentTile.getY());
+            }
         }
-        if(recentHole != null && !isObjectInSensorRange(recentHole) && this.hasTile()) {
-            holePath = astar.findPath(this.getX(), this.getY(), recentHole.getX(), recentHole.getY());
+        if(recentHole != null && this.hasTile()) {
+            if (isObjectInSensorRange(recentHole) && !getEntitiesInRange().contains(recentHole)) {
+                getMemory().removeObject(recentHole);
+            }
+            else {
+                holePath = astar.findPath(this.getX(), this.getY(), recentHole.getX(), recentHole.getY());
+            }
         }
 
         // If there is a path to a recently seen hole, go to it (score is more important than number of tiles carried)
