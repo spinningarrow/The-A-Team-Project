@@ -326,9 +326,9 @@ public class TWEnvironment extends SimState implements Steppable {
      */
     private void createAgent(TWAgent a, int ordering) {
         schedule.scheduleRepeating(a, ordering, 1.0);
-//        if(TWGUI.instance !=null){
-//            TWGUI.instance.addMemoryPortrayal(a);
-//        }
+        if(TWGUI.instance !=null){
+            TWGUI.instance.addMemoryPortrayal(a);
+        }
     }
 
 

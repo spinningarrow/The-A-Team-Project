@@ -58,6 +58,7 @@ public class TWAgentSensor {
 
         //import facts to memory
         me.getMemory().updateMemory(sensedObjects, objectXCoords, objectYCoords, sensedAgents,agentXCoords,agentYCoords);
+        me.getMemory().decayMemory();
 
     }
 

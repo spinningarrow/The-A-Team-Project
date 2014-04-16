@@ -100,9 +100,12 @@ public class DefaultTWPlanner implements TWPlanner {
     {
         AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
         TWPath path = astar.findPath(agent.getX(), agent.getY(), 0, 0);
-        if(path != null)
+        if(path == null)
+            System.out.println("Path Null Fuel: " + agent.getFuelLevel());
+        if(path != null) {
             System.out.println("Path steps to station: " + path.getpath().size() + " Fuel: " + agent.getFuelLevel());
-        return path != null && (path.getpath().size() <= agent.getFuelLevel()) ? path.getpath().size() + 1 : -1;
+        }
+        return path != null && (path.getpath().size() <= agent.getFuelLevel()) ? path.getpath().size() : -1;
     }
 
     protected TWThought getThoughtForEntitiesRange(TWAgent agent, List<TWEntity> entityList) {
@@ -148,7 +151,7 @@ public class DefaultTWPlanner implements TWPlanner {
 
                         // If the path to the nearest entity + path from entity to fuel station is too costly, go
                         // directly to the fuel station
-                        if(pathNearestHoleToFuel != null && pathToNearestHole.getpath().size() + pathNearestHoleToFuel.getpath().size() > agent.getFuelLevel()) {
+                        if(pathNearestHoleToFuel != null && pathToNearestHole.getpath().size() + pathNearestHoleToFuel.getpath().size() > agent.getFuelLevel() - REFUEL_THRESHOLD_BUFFER/2) {
                             return new TWThought(TWAction.MOVE, pathToFuelStation.getStep(0).getDirection());
                         }
                     }
@@ -170,7 +173,7 @@ public class DefaultTWPlanner implements TWPlanner {
 
                         // If the path to the nearest entity + path from entity to fuel station is too costly, go
                         // directly to the fuel station
-                        if(pathNearestTileToFuel != null && pathToNearestTile.getpath().size() + pathNearestTileToFuel.getpath().size() > agent.getFuelLevel()) {
+                        if(pathNearestTileToFuel != null && pathToNearestTile.getpath().size() + pathNearestTileToFuel.getpath().size() > agent.getFuelLevel() - REFUEL_THRESHOLD_BUFFER/2) {
                             return new TWThought(TWAction.MOVE, pathToFuelStation.getStep(0).getDirection());
                         }
                     }
@@ -188,7 +191,7 @@ public class DefaultTWPlanner implements TWPlanner {
     protected TWPath getNotSoRandomPath(TWAgent agent, String section) {//(TWAgent agent, TWEnvironment environment) {
         //Temp: Chooses a random location and moves towards it
         AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
-        if(getCurrentGoal() != null)
+        if(getCurrentGoal() != null && !isGoalInSensorRange(agent))
         {
             TWPath recalculatedPath = astar.findPath(agent.getX(), agent.getY(), getCurrentGoal().getX(), getCurrentGoal().getY());
             if(recalculatedPath != null)
@@ -299,7 +302,7 @@ public class DefaultTWPlanner implements TWPlanner {
         }
 
         // If fuel is low or agent is already tracking back
-        if (agent.getFuelLevel() <= threshold + REFUEL_THRESHOLD_BUFFER || trackbackFlag) {
+        if (trackbackFlag || agent.getFuelLevel() <= threshold + REFUEL_THRESHOLD_BUFFER) {
             trackbackFlag = true;
 
             // Find a path to the fuel station from the current position
@@ -366,6 +369,12 @@ public class DefaultTWPlanner implements TWPlanner {
     {
         return entity.getX()>=agent.getX()- Parameters.defaultSensorRange && entity.getX()<=agent.getX()+Parameters.defaultSensorRange
                 && entity.getY()>=agent.getY()-Parameters.defaultSensorRange && entity.getY()<=agent.getY()+Parameters.defaultSensorRange;
+    }
+
+    protected boolean isGoalInSensorRange(TWAgent agent)
+    {
+        return getCurrentGoal().getX()>=agent.getX()- Parameters.defaultSensorRange && getCurrentGoal().getX()<=agent.getX()+Parameters.defaultSensorRange
+                && getCurrentGoal().getY()>=agent.getY()-Parameters.defaultSensorRange && getCurrentGoal().getY()<=agent.getY()+Parameters.defaultSensorRange;
     }
 }
 
