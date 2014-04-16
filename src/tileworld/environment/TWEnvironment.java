@@ -14,16 +14,16 @@ import tileworld.agent.*;
 
 /**
  * TWEnvironment
- * 
+ *
  * @author michaellees Created: Apr 16, 2010
- * 
+ *
  *         Copyright michaellees 2010
- * 
- * 
+ *
+ *
  *         Description: Contains the context of the environment and also creates
  *         and removes objects at each time step. You don't need to modify this
  *         but should look at the methods which may be helpful to you.
- * 
+ *
  */
 public class TWEnvironment extends SimState implements Steppable {
 
@@ -31,7 +31,7 @@ public class TWEnvironment extends SimState implements Steppable {
     //Parameters to configure the environment - read from main parameter file
     private final int xDimension = Parameters.xDimension; //size in cells
     private final int yDimension = Parameters.yDimension;
-    
+
     /**
      * grid environment which stores all TWEntities, ObjectGrd is preferred over
      * SparseGrid. The environment is typically not too sparse and we do not
@@ -39,7 +39,7 @@ public class TWEnvironment extends SimState implements Steppable {
      */
     private ObjectGrid2D objectGrid;
     private ObjectGrid2D agentGrid;
-   
+
     private TWObjectCreator<TWTile> tileCreator;
     private TWObjectCreator<TWHole> holeCreator;
     private TWObjectCreator<TWObstacle> obstacleCreator;
@@ -99,13 +99,20 @@ public class TWEnvironment extends SimState implements Steppable {
         b = new SimpleTWAgent2(1, 1, this, Parameters.defaultFuelLevel);
         createAgent(b,3);
 
-        
-//        
+
+//
         //create the fueling station
         fuelingStation = new TWFuelStation(0,0,this);
 
 
 
+    }
+
+    public TWAgent getAgent(TWAgent agent)
+    {
+        if(agent.equals(a))
+            return b;
+        return a;
     }
 
     private void createTWObjects(double time) {
@@ -166,14 +173,14 @@ public class TWEnvironment extends SimState implements Steppable {
     public ObjectGrid2D getObjectGrid() {
         return objectGrid;
     }
-    
+
     public ObjectGrid2D getAgentGrid() {
         return agentGrid;
     }
-    
 
 
- 
+
+
     /**
      * @return the xDimension
      */
@@ -237,7 +244,7 @@ public class TWEnvironment extends SimState implements Steppable {
     /**
      * picks a random location from the environment, used for free walk algorithm.
      * Bit stupid now, will be very slow when the environment fills up.
-     * @param 
+     * @param
      */
     public Int2D generateRandomLocation() {
         int gx = 1, gy = 1;
@@ -283,7 +290,7 @@ public class TWEnvironment extends SimState implements Steppable {
      *
      * @param x The x coordinate of the location to check
      * @param y The y coordinate of the location to check
-     * @return True if the location is valid 
+     * @return True if the location is valid
      */
     public boolean isValidLocation(int x, int y) {
 
@@ -310,20 +317,20 @@ public class TWEnvironment extends SimState implements Steppable {
     /**
      * Creates and schedues a TWAgent. Also adds the agent to the portrayal if
      * a portrayal exists.
-     * 
+     *
      * Remember lower priority means it is executed earlier.
-     * 
-     * 
+     *
+     *
      * @param a
-     * @param ordering 
+     * @param ordering
      */
     private void createAgent(TWAgent a, int ordering) {
         schedule.scheduleRepeating(a, ordering, 1.0);
-        if(TWGUI.instance !=null){
-            TWGUI.instance.addMemoryPortrayal(a);
-        }
+//        if(TWGUI.instance !=null){
+//            TWGUI.instance.addMemoryPortrayal(a);
+//        }
     }
 
 
-   
+
 }

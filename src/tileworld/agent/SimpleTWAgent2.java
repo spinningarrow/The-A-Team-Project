@@ -14,6 +14,7 @@ import tileworld.Parameters;
 import tileworld.environment.*;
 import tileworld.exceptions.CellBlockedException;
 import tileworld.planners.AstarPathGenerator;
+import tileworld.planners.DefaultTWPlanner;
 import tileworld.planners.TWPath;
 
 import java.awt.*;
@@ -38,8 +39,11 @@ import static tileworld.environment.TWDirection.values;
 public class SimpleTWAgent2 extends TWAgent {
 
     private boolean trackbackFlag = false;
+    public DefaultTWPlanner planner;
+
     public SimpleTWAgent2(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
+        planner = new DefaultTWPlanner();
     }
 
     protected List<TWEntity> getEntitiesInRange() {
@@ -219,6 +223,7 @@ public class SimpleTWAgent2 extends TWAgent {
     protected TWThought thinkHelper() {
 
         List<TWEntity> entityList = this.getEntitiesInRange();
+        List<TWAgentPercept> percepts = this.getEnvironment().getAgent(this).getMessage();
 
         //refuel
         if (this.fuelLevel < 1000 && this.getX() == this.getY() && this.getX() == 0) {
@@ -317,15 +322,28 @@ public class SimpleTWAgent2 extends TWAgent {
     }
 
     protected TWThought think() {
-        TWThought thought = thinkHelper();
-        System.out.println("Second Agent Tiles: " + this.carriedTiles.size());
-        if (thought == null) {
-            TWPath notSoRandomPath = getNotSoRandomPath();
-            if(notSoRandomPath != null)
-                return new TWThought(TWAction.MOVE, notSoRandomPath.getStep(0).getDirection());
-            return new TWThought(TWAction.MOVE, getBoundedDirection());
-        }
+        TWThought thought = planner.execute(this, "TopRight");
+//        TWThought thought = thinkHelper();
+//        System.out.println("Second Agent Tiles: " + this.carriedTiles.size());
+//        if (thought == null) {
+//            TWPath notSoRandomPath = getNotSoRandomPath();
+//            if(notSoRandomPath != null)
+//                return new TWThought(TWAction.MOVE, notSoRandomPath.getStep(0).getDirection());
+//            return new TWThought(TWAction.MOVE, getBoundedDirection());
+//        }
         return thought;
+    }
+
+    public List<TWAgentPercept> getMessage(){
+//        return Double.toString(fuelLevel);
+        List<TWAgentPercept> list = new ArrayList<TWAgentPercept>();
+        TWAgentWorkingMemory memory = this.getMemory();
+
+        list.add(new TWAgentPercept(memory.getNearbyHole(this.x,this.y,5),500));
+        list.add(new TWAgentPercept(memory.getNearbyTile(this.x,this.y,5),500));
+        list.add(new TWAgentPercept(memory.getClosestObjectInSensorRange(TWTile.class),500));
+
+        return list;
     }
 
     protected TWDirection getBoundedDirection() {

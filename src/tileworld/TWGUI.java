@@ -203,15 +203,15 @@ public class TWGUI extends GUIState {
      * 
      * @param agent 
      */
-    public void addMemoryPortrayal(TWAgent agent) {
-        ObjectGridPortrayal2D memoryPortrayal = new ObjectGridPortrayal2D();
-        memoryPortrayal.setField(agent.getMemory().getMemoryGrid());
-        memoryPortrayal.setPortrayalForClass(TWHole.class, TWHole.getMemoryPortrayal());
-        memoryPortrayal.setPortrayalForClass(TWTile.class, TWTile.getPortrayal());
-        memoryPortrayal.setPortrayalForClass(TWObstacle.class, TWObstacle.getPortrayal());
-        memoryPortrayal.setPortrayalForClass(TWFuelStation.class, TWFuelStation.getPortrayal());
-        display.attach(memoryPortrayal, agent.getName() +"'s Memory");
-    }
+//    public void addMemoryPortrayal(TWAgent agent) {
+//        ObjectGridPortrayal2D memoryPortrayal = new ObjectGridPortrayal2D();
+//        memoryPortrayal.setField(agent.getMemory().getMemoryGrid());
+//        memoryPortrayal.setPortrayalForClass(TWHole.class, TWHole.getMemoryPortrayal());
+//        memoryPortrayal.setPortrayalForClass(TWTile.class, TWTile.getPortrayal());
+//        memoryPortrayal.setPortrayalForClass(TWObstacle.class, TWObstacle.getPortrayal());
+//        memoryPortrayal.setPortrayalForClass(TWFuelStation.class, TWFuelStation.getPortrayal());
+//        display.attach(memoryPortrayal, agent.getName() +"'s Memory");
+//    }
 
     public void resetDisplay() {
         display.detatchAll();

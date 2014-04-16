@@ -18,6 +18,6 @@ public interface TWPlanner {
     boolean hasPlan();
     void voidPlan();
     Int2D getCurrentGoal();
-    TWDirection execute();
+    tileworld.agent.TWThought execute();
 
 }

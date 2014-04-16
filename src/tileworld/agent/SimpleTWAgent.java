@@ -8,6 +8,7 @@ import tileworld.Parameters;
 import tileworld.environment.*;
 import tileworld.exceptions.CellBlockedException;
 import tileworld.planners.AstarPathGenerator;
+import tileworld.planners.DefaultTWPlanner;
 import tileworld.planners.TWPath;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +31,12 @@ public class SimpleTWAgent extends TWAgent {
     private boolean trackbackFlag = false;
     public static final int REFUEL_THRESHOLD_BUFFER = 20;
     public static final int ASTAR_MAX_SEARCH_DISTANCE = Parameters.xDimension * Parameters.yDimension;
-
+    public DefaultTWPlanner planner;
     //private String randomFlag = "";
 
     public SimpleTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
+        planner = new DefaultTWPlanner();
     }
 
     // Get the tiles or holes that can be seen by the agent
@@ -49,7 +51,6 @@ public class SimpleTWAgent extends TWAgent {
         for (int i = topLeftX; i <= bottomRightX; i++) {
             for (int j = topLeftY; j <= bottomRightY; j++) {
                 TWEntity e = (TWEntity) objectGrid.get(i, j);
-
                 if (e instanceof TWTile || e instanceof TWHole) {
                     entityList.add(e);
                 }
@@ -57,6 +58,7 @@ public class SimpleTWAgent extends TWAgent {
         }
         return entityList;
     }
+
     protected int getTrackbackThreshold ()
     {
         AstarPathGenerator astar = new AstarPathGenerator(getEnvironment(), this, ASTAR_MAX_SEARCH_DISTANCE);
@@ -223,6 +225,8 @@ public class SimpleTWAgent extends TWAgent {
     protected TWThought thinkHelper() {
 
         List<TWEntity> entityList = this.getEntitiesInRange();
+        List<TWAgentPercept> percepts = this.getEnvironment().getAgent(this).getMessage();
+
         // If I'm at the fuel station, refuel
         if (this.fuelLevel < 1000 && this.x == this.y && this.x == 0) {
             return new TWThought(TWAction.REFUEL, TWDirection.Z);
@@ -315,14 +319,15 @@ public class SimpleTWAgent extends TWAgent {
     }
 
     protected TWThought think() {
-        TWThought thought = thinkHelper();
-        System.out.println("First Agent Tiles: " + this.carriedTiles.size());
-        if (thought == null) {
-            TWPath notSoRandomPath = getNotSoRandomPath();
-            if(notSoRandomPath != null)
-                return new TWThought(TWAction.MOVE, notSoRandomPath.getStep(0).getDirection());
-            return new TWThought(TWAction.MOVE, getBoundedDirection());
-        }
+        TWThought thought = planner.execute(this, "BottomLeft");
+        //TWThought thought = thinkHelper();
+//        System.out.println("First Agent Tiles: " + this.carriedTiles.size());
+//        if (thought == null) {
+//            TWPath notSoRandomPath = getNotSoRandomPath();
+//            if(notSoRandomPath != null)
+//                return new TWThought(TWAction.MOVE, notSoRandomPath.getStep(0).getDirection());
+//            return new TWThought(TWAction.MOVE, getBoundedDirection());
+//        }
         return thought;
     }
 

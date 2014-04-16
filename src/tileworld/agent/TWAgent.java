@@ -2,6 +2,8 @@ package tileworld.agent;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
+
 import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -176,6 +178,10 @@ public abstract class TWAgent extends TWEntity implements Steppable {
         }
     }
 
+    public List<TWAgentPercept> getMessage()
+    {
+        return new ArrayList<TWAgentPercept>();
+    }
     /**
      * This is the procedure executed by the agent at every step of the simulation.
      * It senses, then thinks and then performs its decided action
@@ -215,6 +221,9 @@ public abstract class TWAgent extends TWEntity implements Steppable {
         return carriedTiles.size() > 0;
     }
 
+    public int getNumberOfCarriedTiles() {
+        return carriedTiles.size();
+    }
     /**
      * Returns the working memory of this agent
      * @return working memory

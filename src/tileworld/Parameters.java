@@ -43,7 +43,6 @@ public class Parameters {
     public static final int xDimension = 50; //size in cells
     public static final int yDimension = 50;
 
-
     //Object Parameters
     public static final double tileMean = 2;
     public static final double holeMean = 2;
