@@ -36,11 +36,11 @@ import static tileworld.environment.TWDirection.values;
  * Description:
  *
  */
-public class SimpleTWAgent2 extends TWAgent {
+public class FacemanAgent extends TWAgent {
 
     public DefaultTWPlanner planner;
 
-    public SimpleTWAgent2(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
+    public FacemanAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
         planner = new DefaultTWPlanner();
     }
@@ -95,7 +95,7 @@ public class SimpleTWAgent2 extends TWAgent {
 
     @Override
     public String getName() {
-        return "Simple Agent 2";
+        return "Templeton \"Face(man)\" Peck";
     }
 
     public static Portrayal getPortrayal() {

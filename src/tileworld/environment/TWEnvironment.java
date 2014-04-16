@@ -1,7 +1,5 @@
 package tileworld.environment;
 
-import java.util.ArrayList;
-import java.util.List;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.field.grid.ObjectGrid2D;
@@ -49,8 +47,8 @@ public class TWEnvironment extends SimState implements Steppable {
     private Bag tiles;
     private Bag holes;
     private Bag obstacles;
-    SimpleTWAgent a;
-    SimpleTWAgent2 b;
+    HannibalAgent a;
+    FacemanAgent b;
     private TWFuelStation fuelingStation;
 
 
@@ -92,10 +90,10 @@ public class TWEnvironment extends SimState implements Steppable {
         //The environment is also stepped each step
 
         schedule.scheduleRepeating(this, 1, 1.0);
-        a = new SimpleTWAgent(0, 0, this, Parameters.defaultFuelLevel);
+        a = new HannibalAgent(0, 0, this, Parameters.defaultFuelLevel);
         createAgent(a,2);
 
-        b = new SimpleTWAgent2(1, 1, this, Parameters.defaultFuelLevel);
+        b = new FacemanAgent(1, 1, this, Parameters.defaultFuelLevel);
         createAgent(b,3);
 
 

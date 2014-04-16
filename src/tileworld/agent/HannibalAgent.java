@@ -29,11 +29,11 @@ import java.util.List;
  * Description:
  *
  */
-public class SimpleTWAgent extends TWAgent {
+public class HannibalAgent extends TWAgent {
 
     public DefaultTWPlanner planner;
 
-    public SimpleTWAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
+    public HannibalAgent(int xpos, int ypos, TWEnvironment env, double fuelLevel) {
         super(xpos,ypos,env,fuelLevel);
         planner = new DefaultTWPlanner();
     }
@@ -79,6 +79,6 @@ public class SimpleTWAgent extends TWAgent {
 
     @Override
     public String getName() {
-        return "Simple Agent 1";
+        return "John \"Hannibal\" Smith";
     }
 }
