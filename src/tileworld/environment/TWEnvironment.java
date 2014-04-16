@@ -1,4 +1,3 @@
-
 package tileworld.environment;
 
 import java.util.ArrayList;
@@ -108,7 +107,7 @@ public class TWEnvironment extends SimState implements Steppable {
 
     }
 
-    public TWAgent getAgent(TWAgent agent)
+    public TWAgent getOtherAgent(TWAgent agent)
     {
         if(agent.equals(a))
             return b;

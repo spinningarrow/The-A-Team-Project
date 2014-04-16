@@ -53,48 +53,13 @@ import static tileworld.environment.TWDirection.values;
  * The default path generator might use an implementation of A* for each of the behaviors
  *
  */
-public class DefaultTWPlanner implements TWPlanner {
+public class DefaultTWPlanner {
 
     private boolean trackbackFlag = false;
     public static final int REFUEL_THRESHOLD_BUFFER = 20;
     public static final int ASTAR_MAX_SEARCH_DISTANCE = Parameters.xDimension * Parameters.yDimension;
     public Int2D currentGoal;
-
-    public TWPath generatePlan() {
-        
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public boolean hasPlan() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public void voidPlan() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public Int2D getCurrentGoal() { return currentGoal; }
-
-    public TWThought execute() { throw new UnsupportedOperationException("Not supported yet."); }
-
-    protected List<TWEntity> getEntitiesInRange(TWAgent agent) {
-        int sensorRange = Parameters.defaultSensorRange;
-        List<TWEntity> entityList = new ArrayList<TWEntity>();
-        ObjectGrid2D objectGrid = agent.getEnvironment().getObjectGrid();
-        int topLeftX = (agent.getX() - sensorRange) <= 0 ? 0 : agent.getX() - sensorRange;
-        int topLeftY = (agent.getY() - sensorRange) <= 0 ? 0 : agent.getY() - sensorRange;
-        int bottomRightX = (agent.getX() + sensorRange) >= Parameters.xDimension ? Parameters.xDimension-1 : agent.getX() + sensorRange;
-        int bottomRightY = (agent.getY() + sensorRange) >= Parameters.yDimension ? Parameters.yDimension-1 : agent.getY() + sensorRange;
-        for (int i = topLeftX; i <= bottomRightX; i++) {
-            for (int j = topLeftY; j <= bottomRightY; j++) {
-                TWEntity e = (TWEntity) objectGrid.get(i, j);
-                if (e instanceof TWTile || e instanceof TWHole) {
-                    entityList.add(e);
-                }
-            }
-        }
-        return entityList;
-    }
+    public Int2D currentMemoryGoal;
 
     protected int getTrackbackThreshold (TWAgent agent)
     {
@@ -191,9 +156,9 @@ public class DefaultTWPlanner implements TWPlanner {
     protected TWPath getNotSoRandomPath(TWAgent agent, String section) {//(TWAgent agent, TWEnvironment environment) {
         //Temp: Chooses a random location and moves towards it
         AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
-        if(getCurrentGoal() != null && !isGoalInSensorRange(agent))
+        if(currentGoal != null && !isGoalInSensorRange(currentGoal, agent))
         {
-            TWPath recalculatedPath = astar.findPath(agent.getX(), agent.getY(), getCurrentGoal().getX(), getCurrentGoal().getY());
+            TWPath recalculatedPath = astar.findPath(agent.getX(), agent.getY(), currentGoal.getX(), currentGoal.getY());
             if(recalculatedPath != null)
                 return recalculatedPath;
         }
@@ -276,7 +241,9 @@ public class DefaultTWPlanner implements TWPlanner {
     }
 
     public TWThought executeHelper(TWAgent agent) {
-        List<TWEntity> entityList = this.getEntitiesInRange(agent);
+        List<TWEntity> entityList = agent.getEntitiesInRange();
+        AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
+
 //        List<TWAgentPercept> percepts = agent.getEnvironment().getAgent(agent).getMessage();
 
         // If I'm at the fuel station, refuel
@@ -306,7 +273,6 @@ public class DefaultTWPlanner implements TWPlanner {
             trackbackFlag = true;
 
             // Find a path to the fuel station from the current position
-            AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
             TWPath path = astar.findPath(agent.getX(), agent.getY(), 0, 0);
 
             System.out.println("Tracking back->Simple Score: " + agent.getScore());
@@ -327,17 +293,43 @@ public class DefaultTWPlanner implements TWPlanner {
             return currentBestThought;
         }
 
+
+        if(currentMemoryGoal != null && isGoalInSensorRange(currentMemoryGoal, agent)) {
+            TWPath recalculatedPath = astar.findPath(agent.getX(), agent.getY(), currentMemoryGoal.getX(), currentMemoryGoal.getY());
+            if(recalculatedPath != null)
+                return new TWThought(TWAction.MOVE, recalculatedPath.getStep(0).getDirection());
+        }
+
         // If agent sees nothing in its sensor range, retrieve tiles and holes seen nearby from the memory and generate
         // a path towards them; eventually they will come within range (handled above) or we'll keep moving towards them
         TWTile recentTile = agent.getMemory().getNearbyTile(agent.getX(), agent.getY(), 15);
         TWHole recentHole = agent.getMemory().getNearbyHole(agent.getX(), agent.getY(), 15);
 
-        AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
+        // Ask other agent if there is anything of use near it
+        List<TWAgentPercept> messages = null;
+
+        // Ask for holes
+        if (agent.hasTile()) {
+            messages = agent.getEnvironment().getOtherAgent(agent).getMessage(new Int2D(agent.getX(), agent.getY()), TWAgent.OBJECT_HOLE);
+
+            if ((recentHole == null && messages.size() > 0) || (messages.size() > 1 && agent.closerTo(messages.get(0).getO(), recentHole))) {
+                recentHole = (TWHole) messages.get(0).getO();
+            }
+        }
+
+        else if (agent.getNumberOfCarriedTiles() < 3) {
+            messages = agent.getEnvironment().getOtherAgent(agent).getMessage(new Int2D(agent.getX(), agent.getY()), TWAgent.OBJECT_TILE);
+
+            if ((recentTile == null && messages.size() > 0) || (messages.size() > 1 && agent.closerTo(messages.get(0).getO(), recentTile))) {
+                recentTile = (TWTile) messages.get(0).getO();
+            }
+        }
+
         TWPath tilePath = null, holePath = null;
 
         // Find paths to a recently seen tile and hole (if any)
         if(recentTile != null && agent.getNumberOfCarriedTiles() < 3) {
-            if (isObjectInSensorRange(agent, recentTile) && !getEntitiesInRange(agent).contains(recentTile)) {
+            if (isObjectInSensorRange(agent, recentTile) && !entityList.contains(recentTile)) {
                 agent.getMemory().removeObject(recentTile);
             }
             else {
@@ -345,7 +337,7 @@ public class DefaultTWPlanner implements TWPlanner {
             }
         }
         if(recentHole != null && agent.hasTile()) {
-            if (isObjectInSensorRange(agent, recentHole) && !getEntitiesInRange(agent).contains(recentHole)) {
+            if (isObjectInSensorRange(agent, recentHole) && !entityList.contains(recentHole)) {
                 agent.getMemory().removeObject(recentHole);
             }
             else {
@@ -354,12 +346,16 @@ public class DefaultTWPlanner implements TWPlanner {
         }
 
         // If there is a path to a recently seen hole, go to it (score is more important than number of tiles carried)
-        if(holePath != null)
+        if(holePath != null) {
+            currentMemoryGoal = new Int2D(recentHole.getX(), recentHole.getY());
             return new TWThought(TWAction.MOVE, holePath.getStep(0).getDirection());
+        }
 
         // Otherwise go to a recently seen tile
-        if(tilePath != null)
+        if(tilePath != null) {
+            currentMemoryGoal = new Int2D(recentTile.getX(), recentTile.getY());
             return new TWThought(TWAction.MOVE, tilePath.getStep(0).getDirection());
+        }
 
         // We got nothing, defer to the think() method
         return null;
@@ -371,10 +367,10 @@ public class DefaultTWPlanner implements TWPlanner {
                 && entity.getY()>=agent.getY()-Parameters.defaultSensorRange && entity.getY()<=agent.getY()+Parameters.defaultSensorRange;
     }
 
-    protected boolean isGoalInSensorRange(TWAgent agent)
+    protected boolean isGoalInSensorRange(Int2D goal, TWAgent agent)
     {
-        return getCurrentGoal().getX()>=agent.getX()- Parameters.defaultSensorRange && getCurrentGoal().getX()<=agent.getX()+Parameters.defaultSensorRange
-                && getCurrentGoal().getY()>=agent.getY()-Parameters.defaultSensorRange && getCurrentGoal().getY()<=agent.getY()+Parameters.defaultSensorRange;
+        return currentGoal.getX()>=agent.getX()- Parameters.defaultSensorRange && currentGoal.getX()<=agent.getX()+Parameters.defaultSensorRange
+                && currentGoal.getY()>=agent.getY()-Parameters.defaultSensorRange && currentGoal.getY()<=agent.getY()+Parameters.defaultSensorRange;
     }
 }
 

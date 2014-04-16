@@ -1,4 +1,3 @@
-
 package tileworld.agent;
 
 import tileworld.environment.TWEntity;

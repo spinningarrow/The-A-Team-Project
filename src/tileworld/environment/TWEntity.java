@@ -23,7 +23,7 @@ import tileworld.exceptions.InsufficientFuelException;
  */
 
 
-public abstract class TWEntity{
+public abstract class TWEntity implements Comparable<TWEntity> {
 
     private TWEnvironment environment;
 
@@ -124,5 +124,8 @@ public abstract class TWEntity{
         return (this.x == a.x && this.y == a.y);
     }
 
-
+    @Override
+    public int compareTo(TWEntity entity) {
+        return (int) this.getDistanceTo(entity);
+    }
 }

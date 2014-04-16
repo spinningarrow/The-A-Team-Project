@@ -7,9 +7,11 @@ import java.util.List;
 import sim.display.GUIState;
 import sim.engine.SimState;
 import sim.engine.Steppable;
+import sim.field.grid.ObjectGrid2D;
 import sim.portrayal.Inspector;
 import sim.portrayal.LocationWrapper;
 import sim.portrayal.Portrayal;
+import sim.util.Int2D;
 import tileworld.Parameters;
 import tileworld.environment.TWDirection;
 import tileworld.environment.TWEntity;
@@ -35,6 +37,8 @@ import tileworld.exceptions.InsufficientFuelException;
  */
 public abstract class TWAgent extends TWEntity implements Steppable {
 
+    public static final int OBJECT_HOLE = 0;
+    public static final int OBJECT_TILE = 1;
     protected int score;
 
     public int getScore() {
@@ -178,10 +182,75 @@ public abstract class TWAgent extends TWEntity implements Steppable {
         }
     }
 
-    public List<TWAgentPercept> getMessage()
-    {
-        return new ArrayList<TWAgentPercept>();
+    public List<TWEntity> getEntitiesInRange() {
+        TWAgent agent = this;
+
+        int sensorRange = Parameters.defaultSensorRange;
+        List<TWEntity> entityList = new ArrayList<TWEntity>();
+        ObjectGrid2D objectGrid = agent.getEnvironment().getObjectGrid();
+        int topLeftX = (agent.getX() - sensorRange) <= 0 ? 0 : agent.getX() - sensorRange;
+        int topLeftY = (agent.getY() - sensorRange) <= 0 ? 0 : agent.getY() - sensorRange;
+        int bottomRightX = (agent.getX() + sensorRange) >= Parameters.xDimension ? Parameters.xDimension-1 : agent.getX() + sensorRange;
+        int bottomRightY = (agent.getY() + sensorRange) >= Parameters.yDimension ? Parameters.yDimension-1 : agent.getY() + sensorRange;
+        for (int i = topLeftX; i <= bottomRightX; i++) {
+            for (int j = topLeftY; j <= bottomRightY; j++) {
+                TWEntity e = (TWEntity) objectGrid.get(i, j);
+                if (e instanceof TWTile || e instanceof TWHole) {
+                    entityList.add(e);
+                }
+            }
+        }
+        return entityList;
     }
+
+    public List<TWAgentPercept> getMessage(Int2D requesterPosition, int requiredObject){
+        List<TWAgentPercept> list = new ArrayList<TWAgentPercept>();
+
+        List<TWEntity> dirtyEntityList = getEntitiesInRange();
+        sortEntitiesByDistance(dirtyEntityList, requesterPosition);
+
+        List<TWEntity> entityList = new ArrayList<TWEntity>();
+
+        for (int i = 0; i < dirtyEntityList.size(); i++) {
+            if (requiredObject == OBJECT_HOLE && dirtyEntityList.get(i) instanceof TWHole) {
+                entityList.add(dirtyEntityList.get(i));
+            }
+
+            else if (requiredObject == OBJECT_TILE && dirtyEntityList.get(i) instanceof TWTile) {
+                entityList.add(dirtyEntityList.get(i));
+            }
+        }
+
+        int size = entityList.size();
+        if (size > 0) {
+            list.add(new TWAgentPercept(entityList.get(0), -1));
+        }
+
+        if (size > 1) {
+            list.add(new TWAgentPercept(entityList.get(1), -1));
+        }
+
+        if (size > 2) {
+            list.add(new TWAgentPercept(entityList.get(2), -1));
+        }
+
+        return list;
+    }
+
+    public void sortEntitiesByDistance(List<TWEntity> entityList, Int2D distance) {
+        TWEntity temp;
+
+        for (int i = 0; i < entityList.size() - 1; i++) {
+            for (int j = 0; j < entityList.size() - i - 1; j++) {
+                if (entityList.get(j).getDistanceTo(distance.getX(), distance.getY()) > entityList.get(j + 1).getDistanceTo(distance.getX(), distance.getY())) {
+                    temp = entityList.get(j);
+                    entityList.set(j, entityList.get(j + 1));
+                    entityList.set(j + 1, temp);
+                }
+            }
+        }
+    }
+
     /**
      * This is the procedure executed by the agent at every step of the simulation.
      * It senses, then thinks and then performs its decided action

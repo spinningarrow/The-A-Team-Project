@@ -3,17 +3,20 @@
  * and open the template in the editor.
  */
 package tileworld.agent;
+
 import sim.field.grid.ObjectGrid2D;
-import tileworld.Parameters;
-import tileworld.environment.*;
-import tileworld.exceptions.CellBlockedException;
-import tileworld.planners.AstarPathGenerator;
-import tileworld.planners.DefaultTWPlanner;
-import tileworld.planners.TWPath;
-import java.util.ArrayList;
-import java.util.List;
 import sim.util.Int2D;
-import static tileworld.environment.TWDirection.*;
+import tileworld.environment.TWEntity;
+import tileworld.environment.TWEnvironment;
+import tileworld.environment.TWHole;
+import tileworld.environment.TWTile;
+import tileworld.exceptions.CellBlockedException;
+import tileworld.planners.DefaultTWPlanner;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 /**
  * TWContextBuilder
  *
@@ -37,19 +40,8 @@ public class SimpleTWAgent extends TWAgent {
 
     protected TWThought think() {
         TWThought thought = planner.execute(this, "BottomLeft");
+        getMessage(new Int2D(0, 0), OBJECT_HOLE);
         return thought;
-    }
-
-    public List<TWAgentPercept> getMessage(){
-//        return Double.toString(fuelLevel);
-        List<TWAgentPercept> list = new ArrayList<TWAgentPercept>();
-        TWAgentWorkingMemory memory = this.getMemory();
-
-        list.add(new TWAgentPercept(memory.getNearbyHole(this.x,this.y,5),500));
-        list.add(new TWAgentPercept(memory.getNearbyTile(this.x,this.y,5),500));
-        list.add(new TWAgentPercept(memory.getClosestObjectInSensorRange(TWTile.class),500));
-
-        return list;
     }
 
     @Override
