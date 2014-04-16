@@ -57,20 +57,18 @@ public class HannibalAgent extends TWAgent {
                     break;
                 case PICKUP:
                     pickUpTile((TWTile)e);
-                    System.out.println("Tiles: "+this.carriedTiles.size());
                     break;
                 case PUTDOWN:
                     putTileInHole((TWHole)e);
-                    System.out.println("Remaining Tiles: "+this.carriedTiles.size());
                     break;
                 case REFUEL:
                     super.refuel();
                     break;
                 case WAIT:
-                    System.out.println("jus 'angin 'round them obstacles people!");
+                    System.out.println(getName() + ": waiting");
                     break;
                 default:
-                    System.out.println("jus 'angin 'round them obstacles nigga!");
+                    System.out.println("Something is wrong...");
             }
         }
         catch (CellBlockedException ex) {
@@ -79,6 +77,6 @@ public class HannibalAgent extends TWAgent {
 
     @Override
     public String getName() {
-        return "John \"Hannibal\" Smith";
+        return "Hannibal";
     }
 }

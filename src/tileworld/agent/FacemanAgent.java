@@ -62,7 +62,6 @@ public class FacemanAgent extends TWAgent {
 
     @Override
     protected void act(TWThought thought) {
-        System.out.println("Simple2 Current Position: (" + x + ", " + y + ")");
         try {
             ObjectGrid2D objectGrid2D = this.getEnvironment().getObjectGrid();
             TWEntity e = (TWEntity) objectGrid2D.get(this.getX(),this.getY());
@@ -73,20 +72,18 @@ public class FacemanAgent extends TWAgent {
                     break;
                 case PICKUP:
                     pickUpTile((TWTile)e);
-                    System.out.println("Simple2 Tiles: "+this.carriedTiles.size());
                     break;
                 case PUTDOWN:
                     putTileInHole((TWHole)e);
-                    System.out.println("Simple2 Remaining Tiles: "+this.carriedTiles.size());
                     break;
                 case REFUEL:
                     super.refuel();
                     break;
                 case WAIT:
-                    System.out.println("Simple2 jus 'angin 'round them obstacles people!");
+                    System.out.println(getName() + ": waiting");
                     break;
                 default:
-                    System.out.println("jus 'angin 'round them obstacles nigga!");
+                    System.out.println("Something is wrong...");
             }
         }
         catch (CellBlockedException ex) {
@@ -95,7 +92,7 @@ public class FacemanAgent extends TWAgent {
 
     @Override
     public String getName() {
-        return "Templeton \"Face(man)\" Peck";
+        return "Faceman";
     }
 
     public static Portrayal getPortrayal() {

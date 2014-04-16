@@ -65,11 +65,7 @@ public class DefaultTWPlanner {
     {
         AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
         TWPath path = astar.findPath(agent.getX(), agent.getY(), 0, 0);
-        if(path == null)
-            System.out.println("Path Null Fuel: " + agent.getFuelLevel());
-        if(path != null) {
-            System.out.println("Path steps to station: " + path.getpath().size() + " Fuel: " + agent.getFuelLevel());
-        }
+
         return path != null && (path.getpath().size() <= agent.getFuelLevel()) ? path.getpath().size() : -1;
     }
 
@@ -77,7 +73,7 @@ public class DefaultTWPlanner {
         AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
 
         if (entityList.size() > 0) {
-            System.out.println("I FOUND A TILE OR A HOLE!");
+//            System.out.println(agent.getName() + " found a tile or a hole");
 
             // Get the distance to the closest tile and hole within range (if any)
             double minHoleDistance = Double.MAX_VALUE;
@@ -184,7 +180,6 @@ public class DefaultTWPlanner {
 
     public TWThought execute(TWAgent agent, String section) {
         TWThought thought = executeHelper(agent);
-        System.out.println("First Agent Tiles: " + agent.getNumberOfCarriedTiles());
         if (thought == null) {
             TWPath notSoRandomPath = getNotSoRandomPath(agent, section);
             if(notSoRandomPath != null)
@@ -275,7 +270,7 @@ public class DefaultTWPlanner {
             // Find a path to the fuel station from the current position
             TWPath path = astar.findPath(agent.getX(), agent.getY(), 0, 0);
 
-            System.out.println("Tracking back->Simple Score: " + agent.getScore());
+            System.out.println(agent.getName().toUpperCase() + ": TRACKING BACK TO FUEL STATION");
 
             if (path != null) {
                 // Decide whether to deviate or not from the path if a tile or a hole is within range
