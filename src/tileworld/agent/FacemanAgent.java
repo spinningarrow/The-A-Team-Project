@@ -9,20 +9,12 @@ import sim.field.grid.ObjectGrid2D;
 import sim.portrayal.Inspector;
 import sim.portrayal.LocationWrapper;
 import sim.portrayal.Portrayal;
-import sim.util.Int2D;
 import tileworld.Parameters;
 import tileworld.environment.*;
 import tileworld.exceptions.CellBlockedException;
-import tileworld.planners.AstarPathGenerator;
 import tileworld.planners.DefaultTWPlanner;
-import tileworld.planners.TWPath;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import static tileworld.environment.TWDirection.W;
-import static tileworld.environment.TWDirection.values;
 
 /**
  * TWContextBuilder
@@ -47,17 +39,6 @@ public class FacemanAgent extends TWAgent {
     protected TWThought think() {
         TWThought thought = planner.execute(this, "TopRight");
         return thought;
-    }
-
-    public List<TWAgentPercept> getMessage(){
-        List<TWAgentPercept> list = new ArrayList<TWAgentPercept>();
-        TWAgentWorkingMemory memory = this.getMemory();
-
-        list.add(new TWAgentPercept(memory.getNearbyHole(this.x,this.y,5),500));
-        list.add(new TWAgentPercept(memory.getNearbyTile(this.x,this.y,5),500));
-        list.add(new TWAgentPercept(memory.getClosestObjectInSensorRange(TWTile.class),500));
-
-        return list;
     }
 
     @Override
