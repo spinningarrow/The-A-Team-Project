@@ -147,10 +147,6 @@ public class DefaultTWPlanner {
         return null;
     }
 
-    public void setCurrentGoal(int x, int y) {
-        this.currentGoal = new Int2D(x, y);
-    }
-
     protected TWPath getNotSoRandomPath(TWAgent agent, String section) {//(TWAgent agent, TWEnvironment environment) {
         //Temp: Chooses a random location and moves towards it
         AstarPathGenerator astar = new AstarPathGenerator(agent.getEnvironment(), agent, ASTAR_MAX_SEARCH_DISTANCE);
@@ -185,7 +181,7 @@ public class DefaultTWPlanner {
             TWPath pathFound = astar.findPath(agent.getX(), agent.getY(), target.getX(), target.getY());
             if (pathFound != null) {
                 //Gets the last pathstep in TWPath, then return the x, y as a Int2D
-                setCurrentGoal(target.getX(), target.getY());
+                currentGoal = new Int2D(target.getX(), target.getY());
                 return pathFound;
             }
         }
