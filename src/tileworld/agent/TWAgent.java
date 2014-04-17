@@ -40,6 +40,7 @@ public abstract class TWAgent extends TWEntity implements Steppable {
     public static final int OBJECT_HOLE = 0;
     public static final int OBJECT_TILE = 1;
     protected int score;
+    int stepCount;
 
     public int getScore() {
         return score;
@@ -258,6 +259,7 @@ public abstract class TWAgent extends TWEntity implements Steppable {
      * @param state
      */
     public final void step(SimState state) {
+        stepCount++;
         this.sense();
         TWThought thought = this.think();
         this.act(thought);
@@ -321,4 +323,8 @@ public abstract class TWAgent extends TWEntity implements Steppable {
      * 
      */
     public abstract String getName();
+
+    public int getStepCount() {
+        return stepCount;
+    }
 }

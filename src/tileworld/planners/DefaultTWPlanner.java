@@ -304,19 +304,23 @@ public class DefaultTWPlanner {
         List<TWAgentPercept> messages = null;
 
         // Ask for holes
-        if (agent.hasTile()) {
-            messages = agent.getEnvironment().getOtherAgent(agent).getMessage(new Int2D(agent.getX(), agent.getY()), TWAgent.OBJECT_HOLE);
+        if (agent.getStepCount() < 50) {
+            if (agent.hasTile()) {
+                messages = agent.getEnvironment().getOtherAgent(agent).getMessage(new Int2D(agent.getX(), agent.getY()), TWAgent.OBJECT_HOLE);
 
-            if ((recentHole == null && messages.size() > 0) || (messages.size() > 1 && agent.closerTo(messages.get(0).getO(), recentHole))) {
-                recentHole = (TWHole) messages.get(0).getO();
+                if ((recentHole == null && messages.size() > 0) || (messages.size() > 1 && agent.closerTo(messages.get(0).getO(), recentHole))) {
+                    recentHole = (TWHole) messages.get(0).getO();
+                    System.out.println(agent.getName() + " used a message containing a hole");
+                }
             }
-        }
 
-        else if (agent.getNumberOfCarriedTiles() < 3) {
-            messages = agent.getEnvironment().getOtherAgent(agent).getMessage(new Int2D(agent.getX(), agent.getY()), TWAgent.OBJECT_TILE);
+            else if (agent.getNumberOfCarriedTiles() < 3) {
+                messages = agent.getEnvironment().getOtherAgent(agent).getMessage(new Int2D(agent.getX(), agent.getY()), TWAgent.OBJECT_TILE);
 
-            if ((recentTile == null && messages.size() > 0) || (messages.size() > 1 && agent.closerTo(messages.get(0).getO(), recentTile))) {
-                recentTile = (TWTile) messages.get(0).getO();
+                if ((recentTile == null && messages.size() > 0) || (messages.size() > 1 && agent.closerTo(messages.get(0).getO(), recentTile))) {
+                    recentTile = (TWTile) messages.get(0).getO();
+                    System.out.println(agent.getName() + " used a message containing a tile");
+                }
             }
         }
 
