@@ -4,6 +4,7 @@
  */
 package tileworld.planners;
 
+import org.omg.Dynamic.Parameter;
 import sim.field.grid.ObjectGrid2D;
 import sim.util.Int2D;
 import tileworld.Parameters;
@@ -56,8 +57,8 @@ import static tileworld.environment.TWDirection.values;
 public class DefaultTWPlanner {
 
     private boolean trackbackFlag = false;
-    public static final int REFUEL_THRESHOLD_BUFFER = 20;
-    public static final int MEMORY_THRESHOLD_BUFFER = 20;
+    public static final int REFUEL_THRESHOLD_BUFFER = 15;
+    public static final int MEMORY_THRESHOLD_BUFFER = 30;
     public static final int ASTAR_MAX_SEARCH_DISTANCE = Parameters.xDimension * Parameters.yDimension;
     public Int2D currentGoal;
     public Int2D currentMemoryGoal;
@@ -163,12 +164,23 @@ public class DefaultTWPlanner {
             //Generate a random location
             Int2D target = agent.getEnvironment().generateFarRandomLocation(agent.getX(), agent.getY(), Parameters.defaultSensorRange * 2);
             if(section.equalsIgnoreCase("BottomLeft")) {
-                while (target.getX() > target.getY())
-                    target = agent.getEnvironment().generateFarRandomLocation(agent.getX(), agent.getY(), Parameters.defaultSensorRange + 1);
+                if(Parameters.xDimension == Parameters.yDimension)
+                    while (target.getX() > target.getY())
+                        target = agent.getEnvironment().generateFarRandomLocation(agent.getX(), agent.getY(), Parameters.defaultSensorRange + 1);
+                else {
+                    while(target.getX() > Parameters.xDimension/2)
+                        target = agent.getEnvironment().generateFarRandomLocation(agent.getX(), agent.getY(), Parameters.defaultSensorRange + 1);
+                }
             }
             else {
-                while (target.getX() < target.getY())
-                    target = agent.getEnvironment().generateFarRandomLocation(agent.getX(), agent.getY(), Parameters.defaultSensorRange + 1);
+                if (Parameters.xDimension == Parameters.yDimension)
+                    while (target.getX() < target.getY())
+                        target = agent.getEnvironment().generateFarRandomLocation(agent.getX(), agent.getY(), Parameters.defaultSensorRange + 1);
+                else {
+                    while (target.getX() < Parameters.xDimension / 2)
+                        target = agent.getEnvironment().generateFarRandomLocation(agent.getX(), agent.getY(), Parameters.defaultSensorRange + 1);
+
+                }
             }
             TWPath pathFound = astar.findPath(agent.getX(), agent.getY(), target.getX(), target.getY());
             if (pathFound != null) {
@@ -288,7 +300,6 @@ public class DefaultTWPlanner {
         if(currentBestThought != null) {
             return currentBestThought;
         }
-
 
         if(currentMemoryGoal != null && !isGoalInSensorRange(currentMemoryGoal, agent)) {
             TWPath recalculatedPath = astar.findPath(agent.getX(), agent.getY(), currentMemoryGoal.getX(), currentMemoryGoal.getY());

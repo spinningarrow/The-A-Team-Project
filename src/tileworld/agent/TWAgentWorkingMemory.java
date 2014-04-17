@@ -45,7 +45,7 @@ public class TWAgentWorkingMemory {
      */
     private Schedule schedule;
     private TWAgent me;
-    private final static int MAX_TIME = 21;
+    private final static int MAX_TIME = 31;
     private final static float MEM_DECAY = 0.5f;
     
      private ObjectGrid2D memoryGrid;
