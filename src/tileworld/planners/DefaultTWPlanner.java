@@ -289,7 +289,7 @@ public class DefaultTWPlanner {
         }
 
 
-        if(currentMemoryGoal != null && isGoalInSensorRange(currentMemoryGoal, agent)) {
+        if(currentMemoryGoal != null && !isGoalInSensorRange(currentMemoryGoal, agent)) {
             TWPath recalculatedPath = astar.findPath(agent.getX(), agent.getY(), currentMemoryGoal.getX(), currentMemoryGoal.getY());
             if(recalculatedPath != null)
                 return new TWThought(TWAction.MOVE, recalculatedPath.getStep(0).getDirection());
@@ -353,6 +353,7 @@ public class DefaultTWPlanner {
         }
 
         // We got nothing, defer to the think() method
+        currentMemoryGoal = null;
         return null;
     }
 
@@ -364,8 +365,8 @@ public class DefaultTWPlanner {
 
     protected boolean isGoalInSensorRange(Int2D goal, TWAgent agent)
     {
-        return currentGoal.getX()>=agent.getX()- Parameters.defaultSensorRange && currentGoal.getX()<=agent.getX()+Parameters.defaultSensorRange
-                && currentGoal.getY()>=agent.getY()-Parameters.defaultSensorRange && currentGoal.getY()<=agent.getY()+Parameters.defaultSensorRange;
+        return goal.getX()>=agent.getX()- Parameters.defaultSensorRange && goal.getX()<=agent.getX()+Parameters.defaultSensorRange
+                && goal.getY()>=agent.getY()-Parameters.defaultSensorRange && goal.getY()<=agent.getY()+Parameters.defaultSensorRange;
     }
 }
 
