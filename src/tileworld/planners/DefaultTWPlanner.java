@@ -57,6 +57,7 @@ public class DefaultTWPlanner {
 
     private boolean trackbackFlag = false;
     public static final int REFUEL_THRESHOLD_BUFFER = 20;
+    public static final int MEMORY_THRESHOLD_BUFFER = 20;
     public static final int ASTAR_MAX_SEARCH_DISTANCE = Parameters.xDimension * Parameters.yDimension;
     public Int2D currentGoal;
     public Int2D currentMemoryGoal;
@@ -297,8 +298,8 @@ public class DefaultTWPlanner {
 
         // If agent sees nothing in its sensor range, retrieve tiles and holes seen nearby from the memory and generate
         // a path towards them; eventually they will come within range (handled above) or we'll keep moving towards them
-        TWTile recentTile = agent.getMemory().getNearbyTile(agent.getX(), agent.getY(), 15);
-        TWHole recentHole = agent.getMemory().getNearbyHole(agent.getX(), agent.getY(), 15);
+        TWTile recentTile = agent.getMemory().getNearbyTile(agent.getX(), agent.getY(), MEMORY_THRESHOLD_BUFFER);
+        TWHole recentHole = agent.getMemory().getNearbyHole(agent.getX(), agent.getY(), MEMORY_THRESHOLD_BUFFER);
 
         // Ask other agent if there is anything of use near it
         List<TWAgentPercept> messages = null;
