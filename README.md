@@ -6,8 +6,8 @@ Idea: Two agents that pick up and drop tiles in their own half of the grid.
 
 ## Contributors
 
-@csnhacker
-@keerthan1
-@nishanth-9
-@shahbaaz-sabharwal
-@spinningarrow
+@[csnhacker](https://github.com/csnhacker)  
+@[keerthan1](https://github.com/keerthan1)  
+@[nishanth-9](https://github.com/nishanth-9)  
+@[shahbaazsabharwal](https://github.com/shahbaazsabharwal)  
+@[spinningarrow](https://github.com/spinningarrow)
